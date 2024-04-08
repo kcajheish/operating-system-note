@@ -89,3 +89,95 @@ When context is switched, base and bound registers are stored in PCB(process con
 
 When process is descheduled by cpu, its base and bound registers can be moved.
 
+## Translation look aside buffer
+
+Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
+
+TLB(translation look aside buffer)
+- It’s part of memory management unit
+- Also called address translation cache
+- OS looks up TLB before it look up page table in physical memory
+
+TLB hit
+- Virtual page number is stored in TLB and is found
+
+TLB miss
+- Virtual page number isn’t stored in TLB; thus OS looks up page table in physical memory for virtual address.
+- After virtual address is found, physical address(physical frame number) is calculated.
+- Then, TLB is updated with physical frame number and instruction is retried.
+- When it happens, memory access becomes very slow because extra lookup in TLB is required.
+
+WHO handles TLB miss
+- Software (os)
+    - Simple
+        - Hardware raises exception when TLB miss. DO nothing else
+        - OS take care of TLB miss handler of trap.
+    - flexible
+        - OS can uses any data structure to implement TLB without hardware changes
+
+TLB content
+- Fully associated
+    - Hardware searched full TLB in parallel to find a match of virtual address.
+- Format
+    - VPN
+    - PFN
+    - Other bits
+        - Valid
+            - Translation is valid or not
+        - Protection
+            - Read/write/execute?
+        - Dirty
+        - Address space identifier
+
+TLB issues
+- Context switch happens when another process likes to run. Same virtual page number may differ in physical frame number for different process. Thus, TBL has to tell which process does this virtual page number belong to
+- Sol
+    - Flush
+        - Turn valid bits to zero when hardware detects base register of a page table changes
+            - con
+                - Every context switch incurs TLB miss. The cost is high
+    - Address space identifier
+        - It’s used to identify which process is running
+        - ASID of current process is stored in privilege register when context is switched
+        - It resolved TLB miss since address translation of different process can be stored in TLB
+
+Replacement policy
+- When new entry is added to TLB, old one has to be replaced
+- We choose policy to minimized TLB miss and to increase performance
+- Policy
+    - Random
+    - LRU(least recently used)
+
+Real TLB entry
+- MIPS uses software managed TLB.
+- MIPS supports 32-bit address space and 4KB(4k bytes) page size
+    - Need 12 bits for offset because:
+        - One Page size = 4,096 bytes
+        - How many bits are needed to represent 4096?
+            - 2^k = 4096; k = 12
+        - The rest of 20 bits is for virtual page number
+- Privileged instructions
+    - TLBWI
+        - Write to specific entry in TLB
+    - TLBWR
+        - Replace entry in TLB randomly
+    - TLBP
+        - Probe entry in TLB
+    - TLBR
+        - Read entry in TLB
+- Structure
+    - VPN
+    - Not used slot
+    - G
+        - Whether address. can be shared
+    - ASID
+        - Address space identifier
+    - PFN
+        - Physical frame number
+    - C
+        - Coherence, how entry is written to TLB
+    - D
+        - Dirty, whether address is updated in TLB
+    - V
+        - Valid, whether address translation is valid or not
+- Some entries in TLB are reserved for os kernel. A wired register is used to store how many such entries exist
