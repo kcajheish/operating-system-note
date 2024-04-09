@@ -181,3 +181,79 @@ Real TLB entry
     - V
         - Valid, whether address translation is valid or not
 - Some entries in TLB are reserved for os kernel. A wired register is used to store how many such entries exist
+
+## Policy
+
+Replacement policy
+- OS has to decided which page in physical memory to evict when OS is running out of memory.
+    - It indicates that free page list doesn’t have any more free page.
+- When choosing a policy, we likes to maximize cache hits and minimize cache miss
+
+Cache management
+- Average memory access time
+    - $AMAT = T_M + P_m*T_D$
+        - $T_M$: cost of  memory access
+        - $P_m$: probability of cache miss
+        - $T_D$: cost of disk access
+    - Since the cost of disk access is so high, we likes to minimize $P_m$
+        - Usually, $T_D$ in 10 ms and $T_M$ in 100 ns
+- Cold start miss
+    - When cache is empty, cache miss will happen definitely
+
+Policy
+- Optimal replacement policy
+    - Furthest in the future
+    - Con
+        - You can’t predict the future as OS is for general purpose.
+- FIFO
+    - First in first out
+    - Page at the tail of the queue is evicted
+    - con:
+        - Low cache hit rate
+            -  Page is evicted based on whether it’s first brought into memory rather than how those page is used
+- Random
+    - Choose a random page in the cache
+    - Cache hit rate depends on luck of the draw
+- LRU
+    - Least recently used
+    - If a page has been accessed in the near past, it’s likely to access that page again in the future
+- LFU
+    - Least frequently used
+    - Pages which aren’t accessed frequently should be evicted
+
+Workload example
+- When cache size is big enough to hold every page, which policy is chosen doesn’t matter.
+- When workload is random, optimal strategy is the best
+- When workload has locality(e.g. 80% of references targets 20% of pages), optimal and LRU work best
+- When workload is sequential(e.g. access page 1, 2, 3,… 100 in order), random and optimal work best.
+- Note than random doesn’t have weird corner case.
+
+Historical algo
+- Hardware can update time field to current in memory when memory is accessed. To replace least recently used page, simply scan through time field of all page and pick the oldest
+    - con: cost is expensive. e.g. for 4 GB memory size and 4KB page size, there are million of pages which are a lot to scan even for modern CPU
+
+Approximate algo
+- Clock algorithm
+    - Use clock hand to point to a page, check it reference bit. If $reference bit = 1$, page has been used recently. Set it to zero and move to the next bit until a zero reference bit is found and return that page.
+
+Dirty Page
+- Hardware set dirty bit(modified bit) when page is changed
+- Eviction is first made to page that is clean.
+
+Page selection: it determines when page is brought to memory
+- Demanding page
+    - Load page into memory when OS requires it
+- Prefetching
+    - Predict the use of page and load it into memory
+
+How page is written to disk
+- Clustering or grouping
+    - Collect pending writes and write them to disk
+        - It efficient because structure of disk lets large single write more efficient
+
+Thrashing
+- It happens when memory demand of the process is more than what is available
+- Admission control
+    - Only allows subset of process to subscribe to memory
+- Out of memory killer
+    - Daemon chooses a memory intensive process and kills it
