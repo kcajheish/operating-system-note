@@ -51,45 +51,30 @@ How does program ask hardware for atomicity in critical section?
 # Lock
 
 Declare a variable with lock, put it around critical section to ensure atomicity.
-
 - Lock has two states: aquired or available
 - Other states are possible, but they are hidden away from client.
 - To acquired a lock, call lock()
-
-- if lock is already acquired, lock() won't return
-
+    - if lock is already acquired, lock() won't return
 - To release a lock, call unlock()
 
 Why do we need lock after all?
-
 - Although thread is created by programmer, it's scheduled by OS. The result of the program is non-deterministics. With lock, programmer ensures atomicity and thus gain control back.
 
 Coarse grain lock
-
 - use a global variable as lock
-
 - con
-
-- low concurrency as many threads are waiting in lines for a single lock
-
+    - low concurrency as many threads are waiting in lines for a single lock
 - pro
-
-- easy to implement for programmer
+    - easy to implement for programmer
 
 Fine grain lock
-
 - use different variable for different critical section
-
 - pro
-
-- high concurrency
-
+    - high concurrency
 - con
-
-- complicated
+    - complicated
 
 what makes a lock successful?
-
 - Mutual exclusion
     - Only one thread enters critical section.
 - Faireness
@@ -98,34 +83,26 @@ what makes a lock successful?
     - Overhead of acquire a lock
 
 Control interrupt
-
 - Disable interrupt when thread enters critical section
-    - Con
+    - pro
         - User program can’t be trusted
             - An infinite loop is in critical section and CPU never gain control back.
             - User intentionally disables interrupt for infinite amount of time
         - Can’t work on multi-core
             - Interrupt only disable one core of CPUs
-    - Con
+    - con
         - Easy to implement
         - OS can use it to update internal data structure because os is safe.
 
 Load and store
-
 - issue
-
     - low performance: spin wait waste a lot of time
-
     - timely interrupt makes both threads acquire the lock(set flag to one)
-
         - thread_a enters line 9
-
         - CPU interrupts and thread_b starts
-
         - thread b enter line 9, too
 - code
-
-```jsx
+```
 1 typedef struct __lock_t { int flag; } lock_t;
 2
 3 void init(lock_t *mutex) {
@@ -145,18 +122,12 @@ Load and store
 ```
 
 Test and set
-
 - hardware makes test and set atomic
-
 - for a single processor, need preemptive scheduling
-
     - otherwise, CPU never interrupts a thread when it spins
-
 - An old flag is returned. If the flag is already set to one, lock is acquired by a different thread and current thread spin
-
-code
-
-```jsx
+- code
+```
 1 int TestAndSet(int *old_ptr, int new) {
 2   int old = *old_ptr; // fetch old value at old_ptr
 3   *old_ptr = new; // store ’new’ into old_ptr
@@ -165,31 +136,20 @@ code
 ```
 
 evaluate spin lock
-
 - performance
-
     - It’s bad for a single processor. Clock cycles of a single are wasted when a thread spin.
-
     - It’s good for multiple processor. One thread spins until another thread release the lock.
-
 - fairness
-
     - No. Scheduling is controlled by CPU. We have no control over next thread that takes over the lock
-
 - correctness
-
 - yes, only one thread can enter critical section
 
 
 Compare and swap
-
 - acquire the lock when the lock status is expected
-
 - the original status of the lock is returned no matter what
-
 - code
-
-```jsx
+```
 1 void lock(lock_t *lock) {
 2   while (CompareAndSwap(&lock->flag, 0, 1) == 1)
 3     ; // spin
@@ -204,16 +164,11 @@ Compare and swap
 ```
 
 load link and store conditional
-
 - idea
-
     - read the status of the lock; spinning when lock is already acquired. Then, return 1 if you can acquire lock, else return 0.
-
     - Only one thread can success in store conditional
-
 - code
-
-```jsx
+```
 1 int LoadLinked(int *ptr) {
 2   return *ptr;
 3 }
@@ -243,14 +198,11 @@ load link and store conditional
 ```
 
 fetch and add
-
 - used to create a ticket lock
-
 - thread acquires lock when it’s turn of thread.
-
 - It’s fair because each thread is assigned a turn.
-
-```jsx
+- code
+```
 // we need hardward support to make FetchAndAdd atomic.
 1 int FetchAndAdd(int *ptr) {
 2   int old = *ptr;
@@ -280,35 +232,25 @@ fetch and add
 ```
 
 spin too much
-
 - for uniprocessor, spinning wastes a lot of time because thread are not making any progress during spinning.
 
 
 How to avoid wasteful spin?
-
 - Just yield the CPU to another thread
 
 Yield
-
 - Yield moves a thread from running to ready state. Essentially, the thread deschedules itself.
-
 - drawback: When there are 100 threads contend for one lock, we need 99 test-and-set then yield. This is costly due to context switch.
 
 Sleeping instead of spinning
-
 - To avoid too much context switch, use Queue to keep track of thread that should be run next.
-
 - A thread acquires guard lock and hence put manipulation of flag and park in a critical section.
-
 - When a lock is already acquired, put current thread into queue and sleep.
-
 - When a lock is released, wake up a thread in the head of the queue.
-
 - waiting race
-
     - A lock is released before thread is parked. That thread in the queue may never be waken up.
-
-```jsx
+- code
+```
 1 typedef struct __lock_t {
 2   int flag;
 3   int guard;
@@ -347,20 +289,14 @@ Sleeping instead of spinning
 ```
 
 Linux example
-
 - linux use futex to wakeup and sleep a thread.
-
 - A futex holds 32 bits
-
     - the highest bit implies whether lock is acquired or not
-
     - The rest of bits indicates number of sleeping thread
-
     - When the 32 bits value > 0, lock is not acquired
-
 - note that In `unlock`, `0x80000000` hex is binary: `10 00000 00000 00000 00000 00000 00000` (31 zeros).
-
-```jsx
+- code
+```
 1 void mutex_lock (int *mutex) {
 2   int v;
 3   // Bit 31 was clear, we got the mutex (fastpath)
@@ -394,13 +330,9 @@ Linux example
 ```
 
 Two phase lock
-
 - Spin lock is efficient when lock is soon to be release.
-
 - Lock in linux can be acquired in two phase
-
     - spin for a fix amount of time; wait for release of the lock
-
     - stop the spin and put current thread into sleep
 
 ## Event based concurrency
