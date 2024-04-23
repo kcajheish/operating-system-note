@@ -69,3 +69,81 @@ Device driver
 - You can use specific block interface to read/write to the device. It helps support low-level storage management
 - Con
     - SCSI device has detail error reporting but high level abstraction hides most of them.
+
+
+## hard disk
+
+Hard disk drive
+- Persistent data storage which is managed by file system
+- Consist of an array of sectors from 0 to n-1, each with 512 bytes
+    - You can think of them as address space of drive
+- Each write to a sector is atomic
+- Accessing continuous blocks is faster than accessing random blocks
+- To read/write to the disk, induce magnetic change to the disk head
+
+Structure
+- Platter
+    - Plates with two side, each side coated with magnetic material
+- Spindle
+    - spin the platter
+- Track
+    - Circular area on the platter that stores data in unit of block
+- Disk head + disk arm
+
+Seek phase
+- Acceleration
+- Coasting
+- Deceleration
+- Settling
+
+Track skew
+- Allows disk head to read continuously even when the sectors are distributed across track boundaries
+
+Write mechanism
+- Write back
+    - Write is confirmed as long as data is written to cache
+    - Pro: fast IO
+    - Con: error prone
+- Write through
+    - Write is confirmed when data is written to disk
+        - Pro: Correct
+        - Con: slow IO
+
+IO time
+- $T_IO = T_seek + T_rotation + T_transfer$
+- $R_IO = Size_transfer / T_IO$
+- Most disks are optimized for sequential read; random read will be slow
+- In the market, people pursue either
+    - Performance, rate of transfer
+    - Capacity, cost per byte
+
+Disk scheduling
+- OS decides order of IO requests
+- type
+    - Shortest job first
+    - Shortest seek time first
+    - Nearest block first
+
+Scan
+- Why?
+    - We like to avoid starvation. If we favor disk request that reads nearby track, then the request that reads far away track will be starved
+    - These types of scan algorithm are also called elevator algorithm.
+- Sweep
+    - Disk head is positioned from inner to outer or from outer to inner.
+- F-Scan
+    - If tracks are already read in a sweep, then further requests that read those tracks will be stored in a queue and will be serve in the next sweep
+- C-Scan
+    - Circular scan
+    - In a sweep, disk head is first positioned in outer track and the move toward inner track.
+- Shortest positioning time first
+    - Schedule disk requests based on both seek and rotational costs
+    - Often scheduling is implemented in the drive because drive itself has knowledge of position of disk head and layout of the track.
+
+IO merging
+- Work conserve
+    - OS issues the disk request as long as there is one.
+    - Disk is busy most of the time
+- Non work conserve
+    - Or anticipatory disk schedule
+    - Group disk requests that read nearby block
+
