@@ -397,3 +397,109 @@ Con of event loop
 - Hard to maintain
     - Routine can be blocking/non-blocking. They need different styles of coding
 - Async IO requires both select() and AIO for network IO and disk IO
+
+## Common concurrency problem
+
+Watch out for concurrency bugs so we can write robust code.
+
+Atomicity violation
+- We assumes memory access to the certain value is serializable. That causes subtle bugs sometime since interrupt can happens anytime.
+```
+Thread 1::
+if (thd->proc_info) {
+	fputs(thd->proc_info, ...);
+}
+
+Thread 2::
+thd->proc_info = NULL;
+```
+- The solution is quite simple. Acquire lock before accessing those variables.
+```
+pthread_mutex_t proc_info_lock = PTHREAD_MUTEX_INITIALIZER;
+Thread 1::
+pthread_mutex_lock(&proc_info_lock);
+if (thd->proc_info) {
+	fputs(thd->proc_info, ...);
+}
+pthread_mutex_unlock(&proc_info_lock);
+
+Thread 2::
+pthread_mutex_lock(&proc_info_lock);
+thd->proc_info = NULL;
+pthread_mutex_unlock(&proc_info_lock);
+```
+- Dereference: access value in a memory address
+
+Ordering violation
+- We want to execute threads in a certain order. Use conditional variable to ensure order.
+- e.g. mThread in Thread1 should be created before Thread2 is executed and accessing state in mThread
+```
+Thread 1::
+void init() {
+	mThread = PR_CreateThread(mMain, ...);
+}
+
+Thread 2::
+void mMain(...) {
+	mState = mThread->State;
+}
+```
+- sol:
+```
+pthread_mutex_t mtLock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t mtCond = PTHREAD_COND_INITIALIZER;
+int mtInit = 0;
+Thread 1::
+void init() {
+	mThread = PR_CreateThread(mMain, ...);
+	// signal that the thread has been created...
+	pthread_mutex_lock(&mtLock);
+	mtInit = 1;
+	pthread_cond_signal(&mtCond);
+	pthread_mutex_unlock(&mtLock);
+}
+Thread 2::
+void mMain(...) {
+	// wait for the thread to be initialized...
+	pthread_mutex_lock(&mtLock);
+	while (mtInit == 0)
+		pthread_cond_wait(&mtCond, &mtLock);
+	pthread_mutex_unlock(&mtLock);
+	mState = mThread->State;
+}
+
+Deadlock
+- Circular dependency where each thread is waiting for another thread to release the lock
+- Why deadlock happens easily
+    - System is complex and deadlock
+    - Interface hides detail of lock
+```
+Vector v1, v2;
+v1.AddAll(v2);
+```
+
+To prevent deadlock, consider the following:
+- Mutual exclusion
+- Hold and waits
+    - Acquire all locks at once
+    - Con
+        - Programmer has to know order of lock
+        - Less concurrency
+- No preemption
+    - If we can’t acquire the lock, then release the lock
+    - However, livelock is introduced.
+- Circular waits
+    - Introduce lock ordering
+        - e.g. acquire L1 before acquiring L2. One trick is to use Lock whose address is low.
+        - Can be full and partial(multiple groups)
+        - Con
+            - A complicate lock protocol that programmer adheres to
+
+Dead lock avoidance
+- Schedule lock in a way that deadlock can’t happen
+- Con
+    - Processing time takes longer
+
+Detect and recover
+- If deadlock doesn’t happen a lot. It’s pragmatic to detect it when it happens and reboots the system
+
