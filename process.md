@@ -127,3 +127,72 @@ Using Red Black Tree
 Deal with IO and sleeping process
 - when a process waits for IO, it's put to sleep. After sleeping process wakes up, other processes already make progress(a lot of runtime). Thus, process which wakes up will monopolize CPU because of smallest runtime.
     - sol: update the runtime with smaless run time found in the red black tree.
+
+## Multiprocessor Scheduling
+
+Multicore processor
+- Multiple CPU are packed into a chip
+- Application should run in parallel with threads to leverage multiple CPU.
+
+Hardware cache
+- When data is first loaded into memory, they are copied to cache as well
+- e.g. CPU cache
+
+Locality
+- How os populate data in cache
+    - Temporal locality
+        - If you use it now, you need it later
+            - e.g. function call in a loop
+    - Spatial locality
+        - If you use data from x, you need data from neighbor of x as weel
+            - e.g. accessing an array through a loop
+
+Cache coherence
+- how much is actual data deviated in CPU caches
+- why?
+    - When multiple processes are running on different CPU and accessing the same memory address, CPU cache may have stale data because some processes may update the data in memory in runtime.
+- bus snooping
+    - A bus connects CPU cache to memory. When value of memory is updated, CPU caches are noticed and either invalidate or update the data in its own cache.
+
+
+Even with coherence protocol programs need multual exclusion primitive to update data
+- consider below example:
+    - Two threads both read the head node at the same time
+    - We can add lock to resolve it at the cost of decreasing performance
+```
+typedef struct __Node_t {
+    int value;
+    struct __Node_t *next;
+} Node_t;
+
+int List_Pop() {
+    Node_t *tmp = head; // remember old head
+    int value = head->value; // ... and its value
+    head = head->next; // advance to next
+    free(tmp); // free old head
+    return value; // return value @head
+1}
+```
+
+Why should scheduler consider cache affinity?
+- States are remembered in cache so a process can be resumed faster. Scheduler should consider running a process on the CPU that the process used to.
+
+Simple queue multi processor scheduling
+- con
+    - scalability
+        - multiple CPU contends for the same lock
+    - cache affinity
+        - Once job is put to queue, it can be resumed by a different CPU and hence cpu cache has to be populated again.
+- sol
+    - Some processes have affinity to certain CPU while others migrate from CPU to CPU to balance the load.
+        - con: hard to implement
+
+multiple queue multi processor scheduling
+- Each CPU has a queue. The queue is not shared between CPU. Thus we avoid synchronization problem and have better cache affinity.
+- con:
+    - A cpu may be lucky to have easiest jobs. Thus, cpu finishes them quickly and have the remaining jobs monopolize the cpu. This is unfair
+- sol
+    - Transfer the job to the CPU that has fewer job. Thus, load is balanced and fairness is achieved.
+    - a. work stealing
+        - con: large overhead due to constantly peeking
+    - b. keep switching jobs
