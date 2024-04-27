@@ -63,6 +63,63 @@ Scheduler
 Context switch
 - When scheduler decides to switch, context switch stores register of current process and resume registers of another by posing another kernel stack. When process returns from trap, another process can resume.
 
+## CPU Scheduling
+
+We start with simple case with following workload assumption:
+1. Each job runs for the same amount of time.
+2. All jobs arrive at the same time.
+3. Once started, each job runs to completion.
+4. All jobs only use the CPU (i.e., they perform no I/O)
+5. The run-time of each job is known.
+
+Need scheduling metric to know the success of policy
+- turnaround time
+    - $T_{turnaround} = T_{completion} - T_{arrival}$
+    - It's a performance metric
+    - vs Fairness
+        - To achieve best performance, we sometimes need to not run a few jobs and hence decrease fairness.
+- response time
+    - interative performance
+    - $T_{response} = T_{first_run} = T_{arrival}$
+
+Policies
+- FIFO
+    - Start the jobs in the order of arrival.
+    - If jobs can be finished in different duration, we have a problem
+        - Turnaround time is worse when heavy jobs run before light job.
+- SJF(shortest job first)
+    - It's a optimal algorithm for jobs with different workload.
+    - It's a nonpreemptive scheduler.
+    - If jobs can arrive at different time, the issue
+        - The heavy jobs arrive earlier than light jobs and hence large turnaround time.
+- STCF(shortest time to complete first)
+    - Preemptive scheduler
+    - When new jobs arrives, we pick job the can shortest time left
+    - Con
+        - Bad response time because jobs that run latter has to wait for previous job.
+- Round Robin
+    - Time slice
+        - Multiple of timer interrupt
+        - A duration in which CPU dedicates to a job.
+    - Pro
+        - Better response time because jobs take turn for every time slice.
+    - Con
+        - Bad turnaround time due to
+            1. the cost of context switch
+                - Make sure that the time slice is long enough to amortize the cost of switching.
+            2. Jobs are stretched into multiple time slice rather than get it done as soon as possible.
+
+Incorporate IO
+- Treat each CPU burst as a job. This allows interative process performs IO while CPU intensive jobs run.
+    - Next subjobs is submitted only when IO is completed
+
+The common tradeoff
+- To have fairness, turnaround time is bad.
+- To achieve performance, resopnse time is bad
+
+What is the cost of context switch?
+- State of process has to be flushed and restored in CPU cache and TLB...etc.
+
 ## Scheduling: Proportional Share
 
 proportional Share
