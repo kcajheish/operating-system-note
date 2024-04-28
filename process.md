@@ -120,6 +120,35 @@ The common tradeoff
 What is the cost of context switch?
 - State of process has to be flushed and restored in CPU cache and TLB...etc.
 
+## Multi level feedback
+
+Multi level feedback learn from the past and then predict usage in the feature and how process should be scheduled.
+
+Each queue has different priority and there are multiple queues.
+
+Jobs first enter the high priority queue. Scheduler reduces the priority of the job after jobs have run for a few time slices(allotment)
+- Why it works like shortest time to complete scheduler?
+    - We first assumes the job is short. If it doesn't complete in a short amount of time, then it must be a long job.
+
+If both jobs have same priority, scheduler decides the next job based on round robin.
+
+Too keep system responsive, scheduler reset allotment of short interactive job so that it stays at high priority.
+
+However, jobs are starved by
+1. short interactive job(requires IO)
+2. program that games scheduler
+3. process that transits from CPU intensive to interactive
+
+To solve this:
+1. boost every jobs to highest priority after some time slices
+2. account allotment of each process and reduce priority once allotment is used up
+
+How does scheduler decide priority for a process?
+1. calculate CPU usage
+    - e.g. decay usage algorithm
+2. table configured by admin
+    - table defines how process changes priority in a timeline.
+
 ## Scheduling: Proportional Share
 
 proportional Share
