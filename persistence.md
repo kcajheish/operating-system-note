@@ -147,3 +147,118 @@ IO merging
     - Or anticipatory disk schedule
     - Group disk requests that read nearby block
 
+
+## File system implementation
+
+The direct pointers in the inode refers to a data block that belongs the file.
+    - Con:
+        - For a large file, there are many pointers which outsize the inode block(~4KB)
+
+Indirect pointer lets a inode holds more pointer. It points to a different block of pointers, each of which point to the data block.
+- e.g. Assume block size = 4 KB, address size = 4 byte, for a inode with 12 pointers and 1 indrect pointers, we have
+    - 12 + 4*1024 byte/4 byte = 12 + 1024 = 1036 pointers
+
+Multi indirect pointer can grow the file size exponentially. Take a doulble pointer as an example.
+- number of pointer: 1024*1024
+- size: 1024*1024*4KB =~ 4GB
+
+Why multi level design works?
+- Most of the files are small. It makes senses to mix direct and indrect pointer.
+
+Directory is treated as a file. It has a inode that is stored in inode table. Data block pointer by that inode stores a list of tuple of directory-name and inode number.
+
+Another approach is to use linked list.
+- A file allocation table stores key as address of data block and the value as address of next data block.
+- Con
+    - really store when you try to read the last data block or random access
+
+vsfs(very simple file system)
+- Data structure stores reference to metadata and actual data
+- Use system call to read those data structure.
+- Organization
+    - How many inodes in a block?
+        - disk was partitioned into 4 KB blocks.
+        - Assume there are 64 blocks in total
+            - 56 are data region
+            - 5 are inode table
+                - inode table is an array of inode.
+        - Size of inode = 256 byte = 1/4 KB
+        - Thus a block have $${4\ KB \over 1/4\ KB } = 16\ inode$$
+        - We have 5 blocks. Thus in total we have 80 inode.
+    - Whether blocks are allocated or not?
+        - Use data structure to keep track of free blocks
+            - free list
+            - bitmap
+    - A superblock stores information of the file system
+        - e.g. number of inode data block, begin of inode ...etc
+    - Three blocks are reserved for bitmap of inode and data.
+    - Inode
+        - index node
+        - Assumes file system reads inode number of 32, which sector should be located by disk head?
+            - Inode table address starts at 12 KB.
+                - note that three blocks are already reserved
+            - address of the inode 32
+                $$12 + 1/4*32 = 20 KB$$
+            - Since addressable sector on disk is 512 byte(1/2 KB), we have sector
+                $${20 \over 1/2} = 40$$
+- What does "mount the file system to the disk" mean?
+    - file system uses a tree structure to locate address of file and directory.
+    - By mounting the file system, we map that tree to each physical location on the disk.
+
+To track data block of file and directorty, file system uses multilevel index
+- **Direct pointers** are stored at inode
+- **Indirect pointers** are stored at inode as well, but they point to data blocks that have pointer to other data block.
+    - Indirect pointers make file system scalable.
+        - Assume that
+            - memory address ~4 byte(32 bit)
+            - One level indirect pointer
+        - Number of addres that a block includes
+            $$(4 * 1024)/4\ = 1024$$
+        - Those data blocks can have size of
+            - 1024 * 4KB = 4056 ~= 4 GB
+        - If level of indirect pointer is two, then we scale the size of the file system by 1000 times.
+
+Directory
+- It is also pointed by a inode and it data block includes
+- a list of pair of files and directory
+    - inode number, entry name
+- .
+    - current directory
+- ..
+    - parent directory
+- If file/folder is deleted from the directory, empty space is left and can be reused.
+
+Free space management
+- Use bitmap to track inode/data block that is free. When a new file is created, system scan through bitmap and allocate blocks for the new file
+- Pre allocation
+    - Continuous data blocks are allocated for a file.
+     This ensures that access to a file is fast.
+
+To access a file, we have to traverse the path to find the inode of a file.
+- To open /foo/bar,
+1. start with root inode, access data block to read inode from entry of foo
+2. read data block of foo, read inode from entry of bar and then load it into memory
+3. allocate a file descriptor for this inode and in per-process open table
+4. return file descriptor to the user
+
+Open a file incrus lots of IO. This is costly.
+- Each level of directories requires two IO
+    1. read inode
+    2. data block
+- File system caches popular blocks to save IO.
+
+Cache and buffering
+- fixed size
+    - static partition
+    - around 10% of memory are reserved to cache address of blocks
+- unified page cache
+    - cache both file system and translation in virtual memory
+    - pro
+        - Reduce memory cost when file access is not frequent
+- How cache affects write?
+    - Multiple writes to the same block can be batch. This reduces # of IO down to one.
+        - Those batch will be scheduled so that changes are made to the disk.
+    - avoid waste
+        - if you add a line and later remove that line, no IO is needed
+- How long you should wait before you write a batch to disk?
+    - Longer wait leads to good performance but reduce reliability. If system crushes, then we lose all writes in batch.
