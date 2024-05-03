@@ -467,6 +467,7 @@ void mMain(...) {
 	pthread_mutex_unlock(&mtLock);
 	mState = mThread->State;
 }
+```
 
 Deadlock
 - Circular dependency where each thread is waiting for another thread to release the lock
