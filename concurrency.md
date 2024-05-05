@@ -398,6 +398,150 @@ Con of event loop
     - Routine can be blocking/non-blocking. They need different styles of coding
 - Async IO requires both select() and AIO for network IO and disk IO
 
+## Conditional variable
+To build concurrent program, we need
+1. lock
+2. conditional variable
+
+with conditional variable, parent thread check status of the child thread before continuing.
+
+How?
+- parent thread spin and wait for condition to hold true
+    - con: parent thread wastes a lot of cpu cycles.
+- put the parent thread to sleep; wake up the parent thread after the child thread exits and returns.
+
+```
+1 int done = 0;
+2 pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
+3 pthread_cond_t c = PTHREAD_COND_INITIALIZER;
+4
+5 void thr_exit() {
+6   Pthread_mutex_lock(&m);
+7   done = 1;
+8   Pthread_cond_signal(&c);
+9   Pthread_mutex_unlock(&m);
+10 }
+11
+12 void *child(void *arg) {
+13  printf("child\n");
+14  thr_exit();
+15  return NULL;
+16 }
+17
+18 void thr_join() {
+19  Pthread_mutex_lock(&m);
+20  while (done == 0)
+21  Pthread_cond_wait(&c, &m);
+22  Pthread_mutex_unlock(&m);
+23 }
+24
+25 int main(int argc, char *argv[]) {
+26  printf("parent: begin\n");
+27  pthread_t p;
+28  Pthread_create(&p, NULL, child, NULL);
+29  thr_join();
+30  printf("parent: end\n");
+31  return 0;
+32 }
+```
+Why acquire lock before put parent thread to sleep(see line 19)?
+- Avoid race. Before parent thread is put to sleep queue, timer interrupts parent process. Child thread runs to complete and signal the sleeping queue but there are none. Later, parent thread is put to queue and stuck in there forever.
+
+Why is done variable needed? Why not parent thread waits for signal?
+- If the child thread sent a signal before parent thread is put to sleep, then parent stucks in the queue forever. Thus, we need done variable to determine to skip wait. See below as a bad example.
+```
+1 void thr_exit() {
+2   Pthread_mutex_lock(&m);
+3   Pthread_cond_signal(&c);
+4   Pthread_mutex_unlock(&m);
+5 }
+6
+7 void thr_join() {
+8   Pthread_mutex_lock(&m);
+9   Pthread_cond_wait(&c, &m);
+10  Pthread_mutex_unlock(&m);
+11 }
+```
+why is lock acquired before wait and signal?
+```
+1 void thr_exit() {
+2   done = 1;
+3   Pthread_cond_signal(&c);
+4 }
+5
+6 void thr_join() {
+7   if (done == 0)
+8   Pthread_cond_wait(&c);
+9 }
+```
+
+
+Producer/Consumer(Bound/Buffer)
+- Consider a buffer with size 1. Producer thread puts data in the buffer when buffer is empty. Consumer thread get data from the buffer when buffer is full.
+- Mesa semantics
+    - When a thread is woken up, it is first put to ready state.
+    - Although condition is met by the time the thread is woken up, that condition may not hold true when the thread is running.
+    - This happends because there are more than one producer/consumer thread
+- Hoarse semantics
+    - ensure the thread is running after the thread is woken up.
+- below is code
+    - why two condition variable is needed?
+        - Producer threads wakes up producer threads, and vice versa.
+            - Imagine a consumer thread is put to sleep; a consumer thread and a producer thread is in the queue. If the consumer thread is woken, it put to sleep because buffer is still empty. Now, all threads stuck in queue.
+    - why is while loop used over if statement?
+        - after the thread is woken up, the condition may change before that thread is running. Thus, use a while loop to check the condition again.
+    - why is lock used?
+        - To avoid race
+            - two consumer threads compete for the same data in the buffer.
+```
+1 int buffer[MAX];
+2 int fill_ptr = 0;
+3 int use_ptr = 0;
+4 int count = 0;
+5
+6 void put(int value) {
+7   buffer[fill_ptr] = value;
+8   fill_ptr = (fill_ptr + 1) % MAX;
+9   count++;
+10 }
+11
+12 int get() {
+13  int tmp = buffer[use_ptr];
+14  use_ptr = (use_ptr + 1) % MAX;
+15  count--;
+16  return tmp;
+17 }
+```
+```
+1 int loops; // must initialize somewhere...
+2 cond_t empty, fill;
+3 mutex_t mutex;
+4
+5 void *producer(void *arg) {
+6   int i;
+7   for (i = 0; i < loops; i++) {
+8       Pthread_mutex_lock(&mutex); // p1
+9       while (count == MAX) // p2
+10          Pthread_cond_wait(&empty, &mutex); // p3
+11      put(i); // p4
+12      Pthread_cond_signal(&fill); // p5
+13      Pthread_mutex_unlock(&mutex); // p6
+14  }
+15 }
+16
+17 void *consumer(void *arg) {
+18  int i;
+19  for (i = 0; i < loops; i++) {
+20      Pthread_mutex_lock(&mutex); // c1
+21      while (count == 0) // c2
+22          Pthread_cond_wait(&fill, &mutex); // c3
+23      int tmp = get(); // c4
+24      Pthread_cond_signal(&empty); // c5
+25      Pthread_mutex_unlock(&mutex); // c6
+26      printf("%d\n", tmp);
+27  }
+28 }
+```
 ## Common concurrency problem
 
 Watch out for concurrency bugs so we can write robust code.
