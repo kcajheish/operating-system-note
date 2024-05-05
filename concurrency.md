@@ -542,6 +542,12 @@ Producer/Consumer(Bound/Buffer)
 27  }
 28 }
 ```
+
+Covering condition
+- wake up all waiting threads to let one thread make progress
+    - Imagine you have two threads allocate for memory 10 and 100 bytes, and we have run out of memory. A third thread releases 20 bytes of memory. Ideally, first thread should be waken up but the second thread is waken up instead. Since there isn't enough memory, the second thread is put to sleep.
+    - To solve this, simply wake up both threads and check whether we have enough memory for each thread.
+
 ## Common concurrency problem
 
 Watch out for concurrency bugs so we can write robust code.
