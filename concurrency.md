@@ -565,6 +565,62 @@ Semaphore can be used as ordering primitive when we want tasks to be executed af
         - child runs after parent calls sem_wait
         - child runs before parent calls sem_wait
 
+
+In the bound buffer problem, uses semaphore to order producer and consumer.
+- producer set the data when there are empty slots
+    - empty as primitive = MAX
+- consumer get the data when slots are taken(or full)
+    - full as primitive = 0
+- put lock around critical section, get and put
+    - why not include ordering primitive in critical section?
+        - Avoid deadlock.
+            - Imagine buffer is full, a producer acquire the lock and is put to sleep after sem_wait. A consumer likes to process buffer but the lock is already hold by producer
+    - why is lock needed?
+        - Avoid race condition
+            - two thread both want to make buffer fill
+- ordering primitive is put around lock
+```
+// get and put
+1 int buffer[MAX];
+2 int fill = 0;
+3 int use = 0;
+4
+5 void put(int value) {
+6 buffer[fill] = value; // Line F1
+7 fill = (fill + 1) % MAX; // Line F2
+8 }
+9
+10 int get() {
+11 int tmp = buffer[use]; // Line G1
+12 use = (use + 1) % MAX; // Line G2
+13 return tmp;
+14 }
+
+// producer and consumer
+1 void *producer(void *arg) {
+2   int i;
+3   for (i = 0; i < loops; i++) {
+4       sem_wait(&empty); // Line P1
+5       sem_wait(&mutex); // Line P1.5 (lock)
+6       put(i); // Line P2
+7       sem_post(&mutex); // Line P2.5 (unlock)
+8       sem_post(&full); // Line P3
+9   }
+10 }
+11
+12 void *consumer(void *arg) {
+13  int i;
+14  for (i = 0; i < loops; i++) {
+15      sem_wait(&full); // Line C1
+16      sem_wait(&mutex); // Line C1.5 (lock)
+17      int tmp = get(); // Line C2
+18      sem_post(&mutex); // Line C2.5 (unlock)
+19      sem_post(&empty); // Line C3
+20      printf("%d\n", tmp);
+21  }
+22 }
+```
+
 ## Common concurrency problem
 
 Watch out for concurrency bugs so we can write robust code.
