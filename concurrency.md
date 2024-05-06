@@ -548,6 +548,23 @@ Covering condition
     - Imagine you have two threads allocate for memory 10 and 100 bytes, and we have run out of memory. A third thread releases 20 bytes of memory. Ideally, first thread should be waken up but the second thread is waken up instead. Since there isn't enough memory, the second thread is put to sleep.
     - To solve this, simply wake up both threads and check whether we have enough memory for each thread.
 
+## Semaphore
+Semaphore is a primitive to ensure synchronization. Assign a value to it by calling sem_init(&m, 0, init_value). Then, put sem_wait(&m) and sem_post(&m) around critical section.
+- init init_value = number of threads that can enter critical section.
+- when init_value = 1, it's a lock, which is also called binary semaphore.
+
+sem_wait decreases the value by one; if value < 1, put current thread into sleep queue.
+- when value of m < 0, the magnitude = number of sleeping thread.
+
+sem_post increases the value by one and wake up one thread from a sleeping queue.
+
+Semaphore can be used as ordering primitive when we want tasks to be executed after events happne.
+- init_value = 0
+- example: a parent process creates child process and wait for results.
+    - two cases
+        - child runs after parent calls sem_wait
+        - child runs before parent calls sem_wait
+
 ## Common concurrency problem
 
 Watch out for concurrency bugs so we can write robust code.
