@@ -670,6 +670,21 @@ Read Writer Lock
 35 }
 ```
 
+The Dining Philosophers
+- 5 persons sits on the round table. One fork is between them. Deadlock happens when each person takes the left fork at the same time before each person takes the right fork.
+- sol: last person takes the right fork first
+```
+1 void get_forks(int p) {
+2   if (p == 4) {
+3       sem_wait(&forks[right(p)]);
+4       sem_wait(&forks[left(p)]);
+5   } else {
+6       sem_wait(&forks[left(p)]);
+7        sem_wait(&forks[right(p)]);
+8   }
+9 }
+```
+
 ## Common concurrency problem
 
 Watch out for concurrency bugs so we can write robust code.
