@@ -685,6 +685,14 @@ The Dining Philosophers
 9 }
 ```
 
+Thread throttling
+- limit the number threads that can run a specific piece of code
+- why?
+    - An area of code is memory intensive. Too many threads that execute this area of code need to allocate memory more than a machine can have. Thus machine starts thrashing and becomes slow.
+- sol
+    - initialize a semaphore with threshold value
+    - put sem_wait and sem_post around memory intensive code
+
 ## Common concurrency problem
 
 Watch out for concurrency bugs so we can write robust code.
