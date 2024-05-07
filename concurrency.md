@@ -621,6 +621,55 @@ In the bound buffer problem, uses semaphore to order producer and consumer.
 22 }
 ```
 
+Read Writer Lock
+- We want to enable concurrent read while avoid reading the data during insertion
+    - e.g. Imagine you are chopping off the head of the linked list and read the head at the same time.
+- how to build such lock?
+    - keep track of number of readers
+        - when # of reader is 1, take the writer lock
+        - when # of reader is 0, release the writer lock
+    - writer waits until all readers finish and takes writer lock
+- con
+    - too many readers starves writer cuz the writer has to wait until all readers finish.
+- code
+```
+1 typedef struct _rwlock_t {
+2   sem_t lock; // binary semaphore (basic lock)
+3   sem_t writelock; // allow ONE writer/MANY readers
+4   int readers; // #readers in critical section
+5 } rwlock_t;
+6
+7 void rwlock_init(rwlock_t *rw) {
+8   rw->readers = 0;
+9   sem_init(&rw->lock, 0, 1);
+10  sem_init(&rw->writelock, 0, 1);
+11 }
+12
+13 void rwlock_acquire_readlock(rwlock_t *rw) {
+14  sem_wait(&rw->lock);
+15  rw->readers++;
+16  if (rw->readers == 1) // first reader gets writelock
+17      sem_wait(&rw->writelock);
+18  sem_post(&rw->lock);
+19 }
+20
+21 void rwlock_release_readlock(rwlock_t *rw) {
+22  sem_wait(&rw->lock);
+23  rw->readers--;
+24  if (rw->readers == 0) // last reader lets it go
+25      sem_post(&rw->writelock);
+26  sem_post(&rw->lock);
+27 }
+28
+29 void rwlock_acquire_writelock(rwlock_t *rw) {
+30  sem_wait(&rw->writelock);
+31 }
+32
+33 void rwlock_release_writelock(rwlock_t *rw) {
+34  sem_post(&rw->writelock);
+35 }
+```
+
 ## Common concurrency problem
 
 Watch out for concurrency bugs so we can write robust code.
