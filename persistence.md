@@ -392,6 +392,20 @@ hello
 cat: file2: No such file or directory
 ```
 
+permission bits specify permissions for groups
+- identity
+    - owner
+    - group
+    - other
+- bit
+    - readable, 4 bits
+    - writable, 2 bits
+    - excutable, 1 bit
+- e.g. owner can read/write to the file
+    - chmod 600 file_name
+
+to have more granular contorl down to each user, use ACL
+
 ## File system implementation
 
 The direct pointers in the inode refers to a data block that belongs the file.
