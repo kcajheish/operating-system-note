@@ -241,6 +241,24 @@ struct {
 opening the same file returns different entry
 - e.g. offset is updated independently for each entry
 
+parent/child(created by fork) shares the entry in open file table.
+- reference count
+    - increased by one for each share
+- coordinate different process to work on the same task
+
+dup(fd) -> fd
+- return a different fd that points to same underlying file
+- useful for redirection
+```
+int main(int argc, char *argv[]) {
+    int fd = open("README", O_RDONLY);
+    assert(fd >= 0);
+    int fd2 = dup(fd);
+    // now fd and fd2 can be used interchangeably
+    return 0;
+}
+```
+
 
 
 ## File system implementation
