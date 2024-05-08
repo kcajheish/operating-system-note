@@ -259,7 +259,20 @@ int main(int argc, char *argv[]) {
 }
 ```
 
+writes are buffered before they are persisted in storage.
+- however, data are lost if machine crashes before data are persisted
 
+fsync
+- force all dirty written to the storage
+- make sure to fsync both file and directory if file is created.
+```
+int fd = open("foo", O_CREAT|O_WRONLY|O_TRUNC,S_IRUSR|S_IWUSR);
+assert(fd > -1);
+int rc = write(fd, buffer, size);
+assert(rc == size);
+rc = fsync(fd);
+assert(rc == 0);
+```
 
 ## File system implementation
 
