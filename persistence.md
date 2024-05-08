@@ -146,6 +146,101 @@ IO merging
 - Non work conserve
     - Or anticipatory disk schedule
     - Group disk requests that read nearby block
+## File and directory
+
+file
+- inode number + readable name
+- an abstraction over persistent storage
+- bytes on the disk blocks; store your data
+
+directory
+- inode number + readable name
+- bytes on the disk blocks; include a list of tuple (inode number, readable name) for file and directory
+
+directory hierarchy
+- root(/)
+- subdirectory
+- file
+    - filename + extension
+
+open system call
+- param
+    - filename
+    - flag
+        - permission
+        - truncate
+        - create
+- return
+    - file descriptor
+        - a pointer to persistent storage; you can read & write to it
+        - stored in a process struct
+            - unique to a process
+
+read
+- params
+    - file descriptor
+    - buffer
+    - size of buffer
+- return
+    - no. bytes read
+        - stop when you can't read anything
+
+write
+- params
+    - file descriptor
+    - buffer
+    - size of buffer
+- return
+    - no. bytes written
+
+close
+- params
+    - file descriptor
+
+how does cat command access file?
+- e.g. cat foo.txt
+- use strace to find out
+    - it traces every system call
+
+reserved file descriptor for a process
+- 0: standard input
+- 1: standard output(screen)
+- 2: error
+
+open file table
+- per process
+- each entry belongs to a unique file descriptor; contains
+    - underlying file
+    - offset
+    - readable/writable
+
+offset
+- location where next read/write happnes
+- updated for each read and write
+- **lseek** moves the offset
+
+file struct in xv6
+```
+struct file {
+    int ref;
+    char readable;
+    char writable;
+    struct inode *ip; // point to underlying file
+    uint off;
+};
+```
+
+open file table struct in xv6
+```
+struct {
+    struct spinlock lock;
+    struct file file[NFILE];
+} ftable
+```
+
+opening the same file returns different entry
+- e.g. offset is updated independently for each entry
+
 
 
 ## File system implementation
