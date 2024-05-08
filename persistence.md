@@ -406,6 +406,15 @@ permission bits specify permissions for groups
 
 to have more granular contorl down to each user, use ACL
 
+Different file systems can be glued to existing file system tree.
+- implication
+    - can swap or integrate various persistent device
+- e.g. > mount -t ext3 /dev/sda1 /home/users
+    - mount point: /home/users
+    - device: /dev/sda1
+    - file system type: ext3
+    - result: the root of device becomes mountpoint
+
 ## File system implementation
 
 The direct pointers in the inode refers to a data block that belongs the file.
