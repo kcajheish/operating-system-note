@@ -307,6 +307,57 @@ struct stat {
     time_t st_ctime; // time of last status change
 };
 ```
+
+unlink
+- remove file
+
+mkdir
+- make directory
+
+ls
+- read directory
+```
+int main(int argc, char *argv[]) {
+    DIR *dp = opendir(".");
+    assert(dp != NULL);
+    struct dirent *d;
+    while ((d = readdir(dp)) != NULL) {
+        printf("%lu %s\n", (unsigned long) d->d_ino,d->d_name);
+    }
+    closedir(dp);
+    return 0;
+}
+
+struct dirent {
+    char d_name[256]; // filename
+    ino_t d_ino; // inode number
+    off_t d_off; // offset to the next dirent
+    unsigned short d_reclen; // length of this record
+    unsigned char d_type; // type of file
+};
+```
+
+rmdir
+- remove directory
+    - folder must be emtpy
+
+ln old_file_name new_file_name
+- create a new link that refers to the file
+    - having new readable name that is given to the same inode number
+- you can't link a directory to avoid cycle
+
+reference count
+- track number of links to a inode
+- if reference count = 0, file is removed(e.g. data/node blocks are free).
+
+when file is created
+1. inode is created
+2. human readable name is assigned to that inode
+
+when file is deleted
+1. link to the inode is removed
+2. inode is removed if reference count = 0
+
 ## File system implementation
 
 The direct pointers in the inode refers to a data block that belongs the file.
