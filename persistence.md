@@ -374,6 +374,24 @@ when file is deleted
 1. link to the inode is removed
 2. inode is removed if reference count = 0
 
+symbolic link
+- ln -s file file2
+    - create symbolic link file2
+- a file that contains path
+    - the longer the path, the larger the link is
+- dangling reference
+    - symbolic link doesn't point to any hard link
+        - hardlink is removed while symbolic link has yet
+```
+> echo hello > file
+> ln -s file file2
+> cat file2
+hello
+> rm file
+> cat file2
+cat: file2: No such file or directory
+```
+
 ## File system implementation
 
 The direct pointers in the inode refers to a data block that belongs the file.
