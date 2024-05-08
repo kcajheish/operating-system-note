@@ -274,6 +274,18 @@ rc = fsync(fd);
 assert(rc == 0);
 ```
 
+rename(old_file_name, new_file_name)
+- atomic
+    - no in-between state of the file name
+- used when issue mv or update file with editor
+```
+int fd = open("foo.txt.tmp", O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR);
+write(fd, buffer, size); // write out new version of file
+fsync(fd);
+close(fd);
+rename("foo.txt.tmp", "foo.txt");
+```
+
 ## File system implementation
 
 The direct pointers in the inode refers to a data block that belongs the file.
