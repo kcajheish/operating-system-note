@@ -557,3 +557,22 @@ block group
     - data bitmap
     - inode block
     - data block
+
+placement heuristics
+- put new directory in the gorup with the least directory and the most free inode
+- put inode and data block of a file in the same group
+- put file in the same directory in the same group.
+- e.g. /a/c, /a/d, /a/e, /b/f
+```
+group inodes     data
+    0 /--------- /---------
+    1 acde------ accddee---
+    2 bf-------- bff-------
+    3 ---------- ----------
+    4 ---------- ----------
+    5 ---------- ----------
+    6 ---------- ----------
+    7 ---------- ----------
+```
+name based locality
+- files in the same folder are often accessed together
