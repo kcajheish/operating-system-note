@@ -541,3 +541,19 @@ eary file system is slow
 
 disk aware
 - consider disk physical structure when design allocation and file system structure
+
+disk structure
+- cylinder
+- cylinder group
+- track
+
+block group
+- a logical expression for cylinder group; each group have blocks that os can write to
+- fast file access in the same group since cylinders in the same group are close.
+- structure
+    - super block
+        - replica of super block is kept in each group for reliability purpose
+    - inode bitmap
+    - data bitmap
+    - inode block
+    - data block
