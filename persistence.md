@@ -538,3 +538,6 @@ eary file system is slow
     - A small file is removed and leaves empty slots in continuous allocated bocks. Subsequent write may spread out.
     - degragmentation
         - a process that put file inode and data blocks close together
+
+disk aware
+- consider disk physical structure when design allocation and file system structure
