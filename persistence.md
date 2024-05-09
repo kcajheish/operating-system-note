@@ -583,3 +583,17 @@ large file exception
     - amortization: reduce overhead by doing more work
         - e.g. put first 12 blocks close to inode rather than just one block
     - maintains locality for the folder of large file
+
+other stuff about FFS
+- subblock has size ~512 byte < block size 4KB
+    - Subblocks are first allocated for the small file; when file size > 4KB, copy bytes from sublock to blocks and erase bytes in subblocks
+    - it avoids internal fragmentation
+        - e.g. file size = 2KB, block size = 4KB, wasted space $2/4 = 50\%$
+    - con: issue many IO
+- buffering write to subblocks before issue an IO
+- parameterization layout
+    - next sector is placed far away from the current sector so that file system has enough time to issue next write.
+    - con:
+        - peak bandwidth is reduced by 50% since it takes at least two rotations to read every sectors on the same track
+- track buffer
+    - simply cache bytes on the track
