@@ -576,3 +576,10 @@ group inodes     data
 ```
 name based locality
 - files in the same folder are often accessed together
+- measure locality with the distance to least common ancestor folder
+
+large file exception
+- spread large file into multiple groups and reduce costs of seeking among groups
+    - amortization: reduce overhead by doing more work
+        - e.g. put first 12 blocks close to inode rather than just one block
+    - maintains locality for the folder of large file
