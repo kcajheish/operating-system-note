@@ -529,3 +529,12 @@ Cache and buffering
         - if you add a line and later remove that line, no IO is needed
 - How long you should wait before you write a batch to disk?
     - Longer wait leads to good performance but reduce reliability. If system crushes, then we lose all writes in batch.
+
+## Locality and Fast File System
+eary file system is slow
+- treat disk like random access
+    - positioning cost for a single file access is large. Inode and data block are far away.
+- fragmentation
+    - A small file is removed and leaves empty slots in continuous allocated bocks. Subsequent write may spread out.
+    - degragmentation
+        - a process that put file inode and data blocks close together
