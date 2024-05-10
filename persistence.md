@@ -628,3 +628,29 @@ Before the write takes effects, write is cached in buffer before is written to d
 6. bitmap and datablock are written
     - inconsistent with inode
     - don't have pointer to the datablock
+
+Since writes are committed one at a time, it is hard to move file system from one state to another atomically.
+
+write ahead logging
+- Take note what to do next before data is written to disk. If system crashes, revew notes and resume write
+    - Update takes more time but recovery time is reduced
+
+Journal partition
+- In ext2 and ext3, a small part of memory is reserved for jounaling before block groups after super block.
+
+Data journal
+- journal write
+    - TxB: transaction begein
+        - includes info of block address and TID(transaction identifier)
+    - physical content of I, B, Db
+        - also called physical logging which is in contrast with logical logging
+- journal commit
+    - TxE: transaction ends
+- checkpoint
+    - Keep file system update to date with pending write in journal
+
+Design consideration of data journal
+- Journal is commited after journal write.
+    - Commit min 512 bytes to disk; thus, TxE must be 512 bytes in size to ensure atomicity.
+- You can't commit transaction at once
+    - Internal scheduling in disk may commit parts of big write first. Thus, we lose atomicity.
