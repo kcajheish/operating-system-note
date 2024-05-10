@@ -674,3 +674,10 @@ ordered journaling
         - folder data are written to new file data block -> weird state for that datablock
     - sol: add revoke type
         - don't replay that data that has revoked
+
+timeline
+- data journaling
+    - transaction begin and content must be commited before transaction end is issued
+    - data write is issued after transaction end is commited
+- ordered journaling
+    - data write must be commited before transaction end is issued
