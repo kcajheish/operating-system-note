@@ -727,3 +727,19 @@ other write techniques to maintain consistency
     - if forward pointer points to current block, the file is consistent
 - optimistic crash consistency
     - issue as many writes as possible; thus reduce the risk of in consistency
+
+## Log Structured File System
+
+As technology evolves, memory size increases and most of the read reqests can be served from memory. Thus, performance of the file system is mostly determined by how fast a file can be written.
+
+Cost of writing is determined by
+- speed of rotation and seeking
+    - e.g. how fast a disk arm can move
+- number of IO requires to make a file
+- whether bytes of files are stored sequentially
+
+LFS
+- Write requests are batched in the segment. Write segment into next new blocks in disk after segment is full.
+    - Segment is a chunk of data for write reqeusts
+    - Write to disk is sequential
+    - Segment holds large write requests so that they can be written continuously without disk spinning too much
