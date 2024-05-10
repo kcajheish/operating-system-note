@@ -629,6 +629,38 @@ Before the write takes effects, write is cached in buffer before is written to d
     - inconsistent with inode
     - don't have pointer to the datablock
 
+File system checker(fsck)
+- check the entire disk and fix/remove problematic block
+- timing
+    - at boot
+    - run before file system is mounted
+- what is checked
+    - superblock
+        - make sure data block doesn't outgrow
+    - free blocks
+        - build directory tree by scanning inode
+        - compare it to bitmap and trust the result of inode
+    - duplicate
+        - whether two inodes point to the same block
+    - inode link
+        - establish new link count and compare it with number in inode
+        - move dangling inode to lost+found directory
+    - inode state
+        - check type of the inode
+            - e.g. file, directory, symbolic linke...etc
+            - clear inode if types can't be fixed
+    - bad pointer
+        - point to invalid address that is outside of the partition
+    - directory
+        - no directory is linked more than once
+            - each directory has one parent and doesn' have cycle
+        - each inode in the directory is allcoated
+- con
+    - too slow, has to scan entire disk blocks for only few wrong blocks
+    - can't fix all problems
+        - e.g. inode points to garbage data
+    - need intricate knowledge of file system
+
 Since writes are committed one at a time, it is hard to move file system from one state to another atomically.
 
 write ahead logging
