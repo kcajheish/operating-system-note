@@ -669,3 +669,8 @@ ordered journaling
     - object is created before pointer
         - This makes sure pointer never points to garbage data
 - notes that for correctness, we make sure to journal metadata and write datablock before journal is commited.
+- ticky case block reuse
+    - case: delete files in a directory and open a new file; system crashes before checkpoint; for ordered journaling, replay every log.
+        - folder data are written to new file data block -> weird state for that datablock
+    - sol: add revoke type
+        - don't replay that data that has revoked
