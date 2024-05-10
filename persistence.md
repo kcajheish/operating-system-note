@@ -597,3 +597,34 @@ other stuff about FFS
         - peak bandwidth is reduced by 50% since it takes at least two rotations to read every sectors on the same track
 - track buffer
     - simply cache bytes on the track
+
+## Crash Consistency: FSCK and Journaling
+
+crash-consistency
+- how to update persistent data structure when system crashes or power is lost
+    - persistent data structure: directory, file, metadata
+
+two methods that can tackle crash consistency
+- journaling(write ahead logging)
+- fsck(file system check)
+
+An append the the file requires:
+1. update bitmap
+2. update inode
+3. update data block
+
+Before the write takes effects, write is cached in buffer before is written to disk. A crash leads to
+1. bitmap is updated
+    - space leaks
+2. only data block is written
+    - file system doesn't know the file exist
+3. only update inode
+    - reads garbage data
+    - inconsistent with bitmap
+4. bitmap and inode are both updated
+    - read garbage data
+5. inode and datablock are written
+    - inconsistent with bitmap
+6. bitmap and datablock are written
+    - inconsistent with inode
+    - don't have pointer to the datablock
