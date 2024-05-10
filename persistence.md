@@ -654,3 +654,18 @@ Design consideration of data journal
     - Commit min 512 bytes to disk; thus, TxE must be 512 bytes in size to ensure atomicity.
 - You can't commit transaction at once
     - Internal scheduling in disk may commit parts of big write first. Thus, we lose atomicity.
+
+ordered journaling
+- Performance is better than data journaling
+    - In data journal, write traffics are double and most IO cost is spent on data block
+    - In ordered journaling, data block is only written once
+- Steps
+    - data write: user data is written to block group directly
+    - journal metadata: write metadata to journal
+    - journal commit
+    - checkpoint metadata
+    - free: mark transaction free in superblock of journal
+- data write comes first to ensure crash recovery
+    - object is created before pointer
+        - This makes sure pointer never points to garbage data
+- notes that for correctness, we make sure to journal metadata and write datablock before journal is commited.
