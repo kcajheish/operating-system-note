@@ -681,3 +681,17 @@ timeline
     - data write is issued after transaction end is commited
 - ordered journaling
     - data write must be commited before transaction end is issued
+
+other write techniques to maintain consistency
+- soft update
+    - write to data block comes before write to inode
+    - pro: inode never points to garbage
+    - con: requires knowledge of file system data structure
+- copy on write
+    - place new update in unused blocks
+    - pro: easy to keep file system consistent
+- backpointer
+    - each block has a backpointer to inode/direct block
+    - if forward pointer points to current block, the file is consistent
+- optimistic crash consistency
+    - issue as many writes as possible; thus reduce the risk of in consistency
