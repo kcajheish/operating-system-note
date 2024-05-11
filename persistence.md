@@ -815,3 +815,18 @@ block liveness
     4. If the block is not within the range(start + offset), then that block is old
 - improvement: keep track of version for blocks in imap
     - In the same inode, block that has lower version is old
+
+Policy: timing of cleaning
+- hot segment
+    - blocks that are often overwritten
+- cold segment
+    - blocks that are seldom overwritten
+- we like to amortize cost of cleaning
+    - cost of cleaning is expensive
+        1. prove liveness for each block
+        2. copy live block to new segment
+        3. free old segment
+    - intuition
+        - If update to the segment is frequent, having to clean the segment for each update doesn't make sense
+    - implication
+        - The more often the segment is updated, the longer you wait to clean
