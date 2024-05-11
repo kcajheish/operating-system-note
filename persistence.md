@@ -772,3 +772,16 @@ LFS
             - this can be cached in memory to speed up read
         - content is updated for every 30 seconds
             - write performance is amortized
+- directory
+    - create a file in directory
+        - new inode and data block for file & directory
+        - create a inode map having address of both file and directory
+    - read process
+        - read address of directory inode from inode map
+        - read inode and then data block of the directory
+            - you will find (name, inode number) tuple of the files
+        - retrieve inode number of the file you looks for and looks up inode address in inodemap
+        - read file inode and data block
+- LFS avoid recursive update problems
+    - We update address in the imap/cross region and never expose new location to directory. Thus, we don't have to update anything in the parent inode/data block.
+
