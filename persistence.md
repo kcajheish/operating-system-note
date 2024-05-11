@@ -743,3 +743,15 @@ LFS
     - Segment is a chunk of data for write reqeusts
     - Write to disk is sequential
     - Segment holds large write requests so that they can be written continuously without disk spinning too much
+- size of buffer
+    - we like to amortize the cost of position overhead
+    - to achieve max bandwidth, we need to transfer more bits
+    $$
+    \begin{align}
+    T_{write} = T_{position} + T_{transfer} \\
+    T_{write} = T_{position} + {D \over R_{peak}} \\
+    {D \over F*R_{peak}} = T_{position} + {D \over R_{peak}} \\
+    {D \over R_{peak}}({{1 \over F} - 1}) = T_{position}\\
+    D = T_{position}R_{peak}{F \over {1-F}}
+    \end{align}
+    $$
