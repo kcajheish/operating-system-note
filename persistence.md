@@ -830,3 +830,21 @@ Policy: timing of cleaning
         - If update to the segment is frequent, having to clean the segment for each update doesn't make sense
     - implication
         - The more often the segment is updated, the longer you wait to clean
+
+Crash recovery
+- System may crash when data is writte to disk. We like to avoid partial update in this scenario
+- log
+    - stored in CR
+    - structure
+        - pointer to head and tail of checkpoint
+        - pointer to current and next segment
+- Crash during write to CR
+    - take turns to record CR on both end of the disk
+    - include timestamp at header and end for each CR update
+        - if header and end timestamps are inconsistent, we know system crashes
+        - If that is the case, look for CR on both end that has latest complete pair of timestamp and keep it
+- Crash during write to segment
+    - roll forward(?)
+        - lookup last checkpoint in log in CR
+        - check valid write in the next segment
+        - restore data since last checkpoint
