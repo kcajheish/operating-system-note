@@ -785,3 +785,21 @@ LFS
 - LFS avoid recursive update problems
     - We update address in the imap/cross region and never expose new location to directory. Thus, we don't have to update anything in the parent inode/data block.
 
+
+garbage
+- old version of the inode/data block is not needed when new file content is created
+    1. overwrite the file
+    2. append to the file
+- live: newest version of data block
+- versioning file system
+    - the old version of file blocks is kept
+- garbage collection: clear old version of blocks
+    - LFS cleaner
+        - steps
+            1. read in old segment
+            2. kept the live blocks
+            3. write live block into new segment
+            4. free old segment
+        - The process is also called compaction
+        - why segment not individual block?
+            - avoid having holes on the disk; they are hard to reuse for large write
