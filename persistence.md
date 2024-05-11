@@ -803,3 +803,15 @@ garbage
         - The process is also called compaction
         - why segment not individual block?
             - avoid having holes on the disk; they are hard to reuse for large write
+
+block liveness
+- segment summary block(SSB)
+    - For each data block, store tuple (inode number, offset in a file)
+    - It is stored at the head of the segment.
+- to determine whether block is obselete
+    1. Given block address, find current inode number and offset from SSB
+    2. Look up inode address in inodemap for the inode number
+    3. Look up start address and offset in that inode
+    4. If the block is not within the range(start + offset), then that block is old
+- improvement: keep track of version for blocks in imap
+    - In the same inode, block that has lower version is old
