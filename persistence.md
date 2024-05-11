@@ -755,3 +755,19 @@ LFS
     D = T_{position}R_{peak}{F \over {1-F}}
     \end{align}
     $$
+- keep track of lastest oversion because the inode moves when file is overwritten in place
+    - inode map
+        - params
+            - input: inode number
+            - output: disk address of the lastest inode
+        - array type
+            - each entry 4 byte(size of the address)
+        - kept in disk and place right next to the file block
+            - can recover from crash
+            - reduce cost of positioning during write
+    - checkpoint region
+        - why?
+            - Inode map is spread across memory. Need a way to find latest inode map for a given inode number.
+        - map inode number to address of inode map
+        - content is updated for every 30 seconds
+            - write performance is amortized
