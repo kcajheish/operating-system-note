@@ -769,5 +769,6 @@ LFS
         - why?
             - Inode map is spread across memory. Need a way to find latest inode map for a given inode number.
         - map inode number to address of inode map
+            - this can be cached in memory to speed up read
         - content is updated for every 30 seconds
             - write performance is amortized
