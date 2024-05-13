@@ -195,3 +195,97 @@ Privilege escalation
     - Privilege is taken away as soon as program exists.
     - Minimal sets of privilege is given to the process.
 - e.g. sudo -u programmer install new program
+
+## Cryptography
+OS has no control over external machine and how other access hardware through some mechanisms. So, use cryptography to protect data.
+- Be careful that cryptography is computationally expensive.
+
+
+C = E(P, K)
+- C: cipher text
+- E: encryption algorithm
+- P: plain text
+- K: secret key
+
+P = D(C, K)
+- D decryption algorithm
+
+Cryptograph works since
+- it's deterministic
+- hard to compute plaintext without key
+    - needs a good cipher
+        - e.g. AES
+- keep your key secret.
+
+To check integrity,
+- hash the plaintext
+- encrypt hash value with plaintext
+- to verify that cipher isn't changed
+    - decrypt cipher
+    - hash the plaintext
+    - compare generated hash value with embedded hash value
+
+It can also achieve authentication because only sender/receiver knows the key.
+- If you can decrypt the cipher with the shared key, you know cipher comes from the person you know.
+- In symmetric crptography, same key is used to encrypt/decrypt.
+
+Some use cases
+1. salted hash password
+2. proof of work
+    - submitter has to format request and hash the request to meet the standard
+3. integrity of the file
+
+How to crack cryptography
+- Bad cipher
+- Distribute key in plain text
+- Steal key from memory on remote host
+- Generate key from reduced set
+- Brute force attack which guesses key
+	- length of key should be large
+- Don’t make private key public
+	- e.g. it’s bad for each device to have the same private key
+
+Why cryptography may not work operating system
+- os may copy and use your key
+- attacker may intrude os at anytime and steal the key
+
+How can cryptography be used?
+- data is only encrypted, not decrypted
+	- e.g. store encrypted password
+- transit data to other machine
+- at rest data encryption
+	- os encrypts data and doesn’t have key to decrypt it
+
+
+At rest data encryption
+- we like to encrypt data before store it on disk
+    - e.g. full disk encryption
+        - can be achieved by software or hardware
+        - decryption key is obtained at boot time
+- what it can’t protect from
+	- other user from accessing encrypted data
+	- intruder pretends to be the owner of the data
+	- admin has privileges to read those data in plaintext
+	- flaws in os
+		- e.g. memory data can be exploited
+- strength
+	- if device is swapped to another host, it can’t obtain the key to decrypt the data
+		- note that access control is ignored in new host
+
+- password vault
+	- on machine, password is encrypted and indexed by each site; when you login to the site, retrieve site encrypted password and decrypt it
+	- usually, key is not stored on the vault but is offered on demand by the user(from user’s host memory)
+	- when you log out and system is down, key is forgotten from memory
+
+Cryptographic capability
+- In access control, capability can be forged by user and is used for authentication
+    - Use cryptographic to create capability
+- Use symmetry cryptographic for capability when
+    - You trust your system won’t manipulate your key in a wrong way
+    - Content of the capability is not secret
+- Use public cryptography for capability when
+    - you require secrecy in your capability
+- To avoid user from sharing the capability, have below in your capability data structure
+    - expiration time
+    - particular ip
+
