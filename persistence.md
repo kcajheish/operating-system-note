@@ -1005,3 +1005,17 @@ Write leveling
 - Long structured FTL, writes are spread across pages and thus each page has the same erase/program cycle
 - Detect long live block and rewrite them
     - Garbage collection reclaims dead pages; however, long live page is never reclaimed and thus break the leveling
+
+Compare SSD with HDD(hard disk drive)
+- SSD is similar to DRAM in that
+    1. fast random read/write, ~100 MB/s vs 1 MB/s for HDD
+    2. fast sequential read/write, ~400 MB/s vs 200 MB/s for HDD\
+- thus:
+    1. random IO cost is cheaper in SDD
+    2. sequential IO cost is comparable to HDD
+- use case
+    1. hybrid of SSD + HDD
+        - hot data in SSD
+        - cold data in HDD
+    2. use HDD for archive purpose
+    3. use SSD if you care performance of random access
