@@ -905,3 +905,29 @@ reliability
 side note
 - backward compatibility is important since it ensures interoperability by having multiple system follows a interface
 - however, you may want to rewrite the whole thing when the interface can't be used for technology in the next generation
+
+SSD structure
+- flash chips
+- memory
+    - cahcing and buffering
+    - mapping table
+- control logic
+    - orchestrate devices in SSD
+    - flash translation layer
+        - turns logical block(client read/erase/program) to low level commands on physical block & page
+- consideration
+    - performance
+        - paralle chips
+        - write amplification
+            - def:
+            $$
+                write\ traffics\ issued\ to\ the\ chip\ by\ FTL(bytes) \over{
+                    write\ traffics\ issued\ to\ the\ FTL\ by\ client(bytes)
+                }
+            $$
+    - reliability
+        - wear leveling
+            - def: spread writes evenly across all page so that all pages wear off at the same time
+        - sequential programming
+            - def: erase/write from low page to high page in a block.
+                - it minimizes disturbance
