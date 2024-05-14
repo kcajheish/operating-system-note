@@ -1000,3 +1000,8 @@ Block Level FTL
             1. copy pages in the chunk
             2. reclaim pages in the chunk
             3. write pages to new chunk with new content
+
+Write leveling
+- Long structured FTL, writes are spread across pages and thus each page has the same erase/program cycle
+- Detect long live block and rewrite them
+    - Garbage collection reclaims dead pages; however, long live page is never reclaimed and thus break the leveling
