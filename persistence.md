@@ -970,3 +970,18 @@ Log Structured FTL
             - write evenly to the page
     - con
         - too much garbage(old version of data) collection increases write amplification
+
+Garbage collection
+- reclaim dead block
+    - garbage block: block that have outdated physical page
+    - steps
+        1. read live pages from block
+            - lookup mapping table for pages with latest content
+        2. log live pages them
+        3. reclaim the whole block
+    - con
+        - high cost of reading and rewriting live pages
+    - optimization
+        - reclaim block with full dead pages
+        - overprovision
+            - increase device capacity so that we have more room for write and cleaning can be done in free time
