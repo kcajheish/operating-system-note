@@ -848,3 +848,60 @@ Crash recovery
         - lookup last checkpoint in log in CR
         - check valid write in the next segment
         - restore data since last checkpoint
+
+## Flash-based SSD
+
+solid-state storage device
+- like memory device which consists of transistor without mechanical moving part
+- however, it doesn't lose data after power is lost
+
+
+Flash is the technology of SSD.
+- to write to a flash page, you erase a flash block.
+    - often writes leads to wear out
+
+A cell in the flash chip can preset bit
+- e.g. 4 level of charge is trapped in the cell. we have 4 binary representation:
+    1. 00
+    2. 01
+    3. 10
+    4. 11
+
+flash ship structure
+- bank
+    - block, ~256 KB
+        - page, ~4 KB
+
+flash operation
+- read
+    - microsecond duration, regardless of
+        - position of the device
+        - position of previous request\
+        -> good random access performance
+- erase
+    - expensive, ms duration
+    - have to erase entire block if you like to write a page
+        - by setting every bit in page to 1
+        - before write, block data is copied somewhere
+- program
+    - 100 microseconds
+    - write the page by settings bit patterns in that page
+
+page state
+- erase -> erased
+- program -> valid
+- doing nothing -> invalid\
+-> to program, page must be in erased state
+
+reliability
+- wear out
+    - A block goes through high and low voltage when it is erased and programmed. After multiple cycles of this, extra charges start to accumulate in block, to the point where we can't tell whether it is high or low voltage
+- life time cycle
+    - def: number of program/erased before a block wears out
+    - range: 10k ~ 100k P/E
+- disturbance
+    - def: bits are flipped in neighboring pages during program/read
+
+side note
+- backward compatibility is important since it ensures interoperability by having multiple system follows a interface
+- however, you may want to rewrite the whole thing when the interface can't be used for technology in the next generation
