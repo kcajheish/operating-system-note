@@ -931,3 +931,42 @@ SSD structure
         - sequential programming
             - def: erase/write from low page to high page in a block.
                 - it minimizes disturbance
+
+Directed Mapped
+- Each logical page number maps to a physical page
+    - implication: a write to the logical page requires
+        1. erase all pages in the block
+        2. write new content to the pages\
+    - bad performance
+        - cost ${\propto}$ number of pages in a block
+        - large write amplications
+    - bad reliability
+        - hot page wears out quickly
+            - e.g. file metadata
+
+Log Structured FTL
+- logging
+    - next write happens at the next free page
+- mapping table
+    - logical block -> physical page
+        - note that logical block here has different meaning from the one in directed mapped approach
+- example
+    - config
+        - read/write with size of 4KB
+        - 16 KB block
+        - 4 KB page
+        - 4 pages/block
+        - initial state of page = invalid
+    - write a1 to (001)
+        - pick a free physical page, 0, for logical block 001
+        - erase physical page, 0
+        - write to first page in the block with a1
+        - record (001, physical page 0) in mapping table
+            - for lookup during read
+    - pro
+        - reduce write amplification; increase performance
+            - erase block once in a while
+        - wear leveling
+            - write evenly to the page
+    - con
+        - too much garbage(old version of data) collection increases write amplification
