@@ -1026,6 +1026,15 @@ Hybrid Mapping
             - write pages in block to a new block and update data table
             - clear pages in log table
 
+Page Mapping + Caching
+- only translation of hot page is stored in the memory to save memory space
+- evict
+    - working set can't be accommodated in memory
+        - working set: all possible translations
+    - throw away old mapping and load new mapping
+- dirty page
+    - map in memory is updated but disk isn't
+
 Write leveling
 - Long structured FTL, writes are spread across pages and thus each page has the same erase/program cycle
 - Detect long live block and rewrite them
