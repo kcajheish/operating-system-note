@@ -985,3 +985,18 @@ Garbage collection
         - reclaim block with full dead pages
         - overprovision
             - increase device capacity so that we have more room for write and cleaning can be done in free time
+
+Block Level FTL
+- physical pages are partitioned into chuncks
+    - logical block
+        - chunk number + offset to the target page
+    - mapping tables
+        - chunk number: start page of the chunk
+- pro
+    - requires less memory space to store address, compared to page level mapping
+- con
+    - small write is expensive
+        - each write a page needs
+            1. copy pages in the chunk
+            2. reclaim pages in the chunk
+            3. write pages to new chunk with new content
