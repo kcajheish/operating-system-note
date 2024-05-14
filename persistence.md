@@ -1001,6 +1001,31 @@ Block Level FTL
             2. reclaim pages in the chunk
             3. write pages to new chunk with new content
 
+Hybrid Mapping
+- structure
+    - log table
+        - logical block: physical page number
+    - data table
+        - chunk number: physical block number
+- goal: reduce traffics during small write
+- case
+    1. switch merge
+        - overwrite data in a physical block
+            - write data in new block
+            - every page is written into log table
+            - detect old block is dead
+            - erase old block
+            - point chunk number point to new block in data table and remove pointers in log table
+    2. partial merge
+        - overwrite partial data in few pages in a block
+            - write partial data in new block
+            - written pages are stored in log table
+    3. full merge
+        - turn every log-mapped page into block-mapped page
+            - read every block for each page in log table
+            - write pages in block to a new block and update data table
+            - clear pages in log table
+
 Write leveling
 - Long structured FTL, writes are spread across pages and thus each page has the same erase/program cycle
 - Detect long live block and rewrite them
