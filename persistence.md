@@ -1134,6 +1134,15 @@ misdirected write
     - include disk and block number
     - although they are redundant, they are helpful for error detection and recovery
 
+lost write
+- client is informed completion of write but the write never reaches to the disk surface
+- e.g. Zettabyte File System (ZFS)
+- sol
+    1. copy checksum in file inode and indirect block
+        - write is lost if checksum in inode ~= checksum in data block.
+    2. read after write(write verify)
+        - con: double IO cost of write
+
 disk scrubbing
 - periodically scan every block, whether checksum is valid
     - reduce the chance that all copy data are corrupted
