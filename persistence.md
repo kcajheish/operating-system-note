@@ -1053,3 +1053,62 @@ Compare SSD with HDD(hard disk drive)
         - cold data in HDD
     2. use HDD for archive purpose
     3. use SSD if you care performance of random access
+
+## Data integrity and protection
+
+fail stop model
+- disk works or fails completely
+    - e.g. raid disk
+
+latent sector error
+- disk head crash on surface; you can't read bits from sector
+
+error correcting code
+- detect whether sector is damaged or not
+
+block corruption
+- data is corrupted when it pass faulty buss or firmware write the data in one block but client wants the other block
+- silent fault; you can't tell whether it goes wrong
+
+fail-partial model
+- disk returns error or wrong content sometimes when client read/write from/to it
+
+To build a reliable storage system, detect and recover form latent sector error and block corruption
+
+to handle LSE, recover through redundancy mechanism
+- e.g. second parity group to backup data
+    - con: more cost for space
+
+to detect corruption, use **checksum**
+- given a chunk of data(block ~4KB), compute summary bytes(4~8 bytes) and store summary with the chunk data
+- before return chunk data to client, compute the summary and compare it with stored summary
+
+checksum function
+- xor
+    - Among two bits, either one holds 1 bit exclusively
+        - e.g.
+            - 1 xor 1 = 0
+            - 0 xor 1 = 1
+            - 1 xor 0 = 1
+            - 0 xor 0 = 0
+    - if we flip two bits, the result is the same
+- 2’s-complement addition
+    - steps
+        - choose number of bits to present the number; add extra bit for negative sign
+        - to add a negative number, flip all bits and plus one
+    - overflow happens when adding two positive or negative number that is out of range
+        - out of range: $number > 2^{number\ of\ bits\ that\ presents\ number}$
+    - [src](https://www.youtube.com/watch?v=ydboHy_yNts&ab_channel=MITOpenCourseWare)
+- cyclic redundancy check(crc)
+    - divide a block, D, with value, k; the remainder is the checksum
+        - D: number that represent the bits in block
+        - k: any chosen value
+- Fletcher
+    - a block D is divided into byte
+        - e.g. d1, d2, d3... dn(we have n division for n bytes)
+    - calculate s1, s2 recursively
+        - s1 = (s1 + di) mod 255
+        - s2 = (s2 + s1) mod 255
+collision
+- two different content have the same checksum
+- a good checksum function minimizes collision
