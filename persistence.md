@@ -1127,3 +1127,8 @@ When $C_s(D) != C_c(D)$, there is corruption because data changes since the time
 - D: block
 
 When there is corruption in block, look for backup data or return error to the client
+
+disk scrubbing
+- periodically scan every block, whether checksum is valid
+    - reduce the chance that all copy data are corrupted
+    - cold blocks are rarely accessed and we don't know whether they are corrupted or not
