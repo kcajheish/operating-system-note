@@ -1120,3 +1120,10 @@ checksum layout
 2. a checksum sector followed by n data block
     - pro: work for all disks
     - con: high IO cost
+
+When $C_s(D) != C_c(D)$, there is corruption because data changes since the time it is stored
+- $C_s(D)$: stored checksum
+- $C_c(D)$: computed checksum
+- D: block
+
+When there is corruption in block, look for backup data or return error to the client
