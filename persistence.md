@@ -1112,3 +1112,11 @@ checksum function
 collision
 - two different content have the same checksum
 - a good checksum function minimizes collision
+
+checksum layout
+1. spare extra space for checksum in each sector
+    - pro: low IO cost
+    - con: only work for certain disk
+2. a checksum sector followed by n data block
+    - pro: work for all disks
+    - con: high IO cost
