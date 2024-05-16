@@ -1128,6 +1128,12 @@ When $C_s(D) != C_c(D)$, there is corruption because data changes since the time
 
 When there is corruption in block, look for backup data or return error to the client
 
+misdirected write
+- Data are written to the wrong block or disk
+- resolve: add physical identifier(physical ID)
+    - include disk and block number
+    - although they are redundant, they are helpful for error detection and recovery
+
 disk scrubbing
 - periodically scan every block, whether checksum is valid
     - reduce the chance that all copy data are corrupted
