@@ -1132,3 +1132,11 @@ disk scrubbing
 - periodically scan every block, whether checksum is valid
     - reduce the chance that all copy data are corrupted
     - cold blocks are rarely accessed and we don't know whether they are corrupted or not
+
+overhead due to checksum
+- disk stores checksum and thus user data has less space
+- load stored cheksum and computed checksum into memory
+    - however, it is short-live and impact is minimal
+- CPU has to compute and compare checksum when data is loaded/stored.
+    - mitigation: before data & stored checksum are transfered from kernel page to user buffer, compare the checksum
+- extra IO is required when 1. scrubbing 2. checksum and data are not stored in the same block
