@@ -266,6 +266,20 @@ RAID 1 analysis
         - reads are distributed evenly across all disks; thus, we are not skipping block and achieve peak bandwidth
         - bandwidth = SN
 
+RAID level 4
+- Use parity to reduce cost of space but sacrifice performance
+- A disk stores the value of parity
+
+Use bitwise XOR to calculate parity
+- xor return 0 if both bits have even number of 1 bit
+- xor return 1 if both bits have odd number of 1 bit
+
+To reconstruct faulty block, calculate XOR(parity, healthy blocks)
+- intuition: parity is flipped when 1 bit is encoutered
+    - thus
+        - if faulty bit is 1 bit, the parity - XOR(healthy blocks) = 1
+        - if faulty bit is 0 bit, then parity - XOR(healthy blocks) = 0
+
 ## File and directory
 
 file
