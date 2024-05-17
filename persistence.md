@@ -234,6 +234,38 @@ RAID level 1: mirroring
 - For a read, controller can decide which copy to read
 - For a write, controller have to update all copy
 
+RAID 1 analysis
+- capacity
+    - half of peak capacity due to mirroring
+        - e.g. ${N\over{2}}B$
+        - N: number of blocks
+        - B: block size
+- reliable
+    - can tolerate block failures up to N/2
+        - N: number of blocks
+- latency
+    - single read request
+        - dispatch request to any disk that has copy of the block
+        - same as single disk
+    - single write request
+        - best case
+            - write to two copy in parallel
+            - same as single disk
+        - worst case
+            - max of (rotation+seek) delay of two write requests
+- steady state throughput
+    - sequnetial write
+        - bandwidth = SN/2
+    - sequentail read
+        - each disk receives request for every other block, thus the bandwidth is half of the peak
+        - bandwidth = SN/2
+    - random write
+        - bandwidth = SN/2
+        - a logical write needs two physical writes
+    - random read
+        - reads are distributed evenly across all disks; thus, we are not skipping block and achieve peak bandwidth
+        - bandwidth = SN
+
 ## File and directory
 
 file
