@@ -154,6 +154,15 @@ In RAIDs, multiple disks are connected in parallel to increase capacity, redunda
 RAIDs offers transparency
 - RAIDs interface is like a single disk; it has excellent software compatibility and deployability.
 
+mirrored RAIDs system
+- a logical IO takes more than one physical IO to keep disk block redundant
+
+structure
+- connection
+    - e.g. SATA, SCSI
+- micro-controller
+    - firmware: write data to buffer block or read data from DRAM
+
 ## File and directory
 
 file
