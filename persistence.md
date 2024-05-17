@@ -224,6 +224,16 @@ $$
     {band\ width} = SN or RN
 $$
 
+RAID level 1: mirroring
+- place copy of a block to different disk
+    - tolerate disk failure
+- RAID 10
+    - place mirror pairs in a stripe
+- RAID 01
+    - copy the stripes
+- For a read, controller can decide which copy to read
+- For a write, controller have to update all copy
+
 ## File and directory
 
 file
