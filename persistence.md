@@ -356,6 +356,25 @@ When to use level 4 or level 5?
 - Use RAID 4 if only large write happens.
 - Use RAID 5 if write pattern is random.
 
+comparison
+|                             | RAID 0 | RAID 1 | RAID 4 | RAID 5 |
+|-----------------------------|--------|--------|--------|--------|
+| capacity                    | NB     | NB/2   | (N-1)B | (N-1)B |
+| reliability                 | 0      | 1~N/2  | 1      | 1      |
+| latency write               | T      | T      | 2T     | 2T     |
+| latency read                | T      | T      | T      | T      |
+| sequential write throughput | SN     | SN/2   | S(N-1) | S(N-1) |
+| random write throughput     | RN     | RN/2   | R/2    | RN/4   |
+| sequential read throughput  | SN     | SN/2   | S(N-1) | S(N-1) |
+| random read throughput      | RN     | RN     | R(N-1) | R(N-1) |
+- conclude
+    - if you care about performance and not about reliability, use stripe
+        - at the cost of reliability
+    - if you care about random read IO and reliability, use mirroing
+        - at the cost of capacity
+    - if you care about reliability and capacity, use RAID5
+        - at the cost of random small write
+
 ## File and directory
 
 file
