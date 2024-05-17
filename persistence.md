@@ -168,6 +168,62 @@ fault model
     - disk has two states: working or fail
 - a controller hardware or software detects disk fault immediately
 
+evaluation
+- capacity
+    - given N disk with B block, how many blocks can client effectively write to?
+        - without mirrored: N*B blocks
+        - mirrored: N*B/2 blocks
+- reliability
+    - how many disk faults system can take before disk stops/fails
+- performance
+    - depends on the workload
+
+RAID level 0: striping
+- An array of blocks are distributed to disks using round-robin
+    - increase parallelism for IO requests
+- stripe
+    - blocks in the same rows
+- chunk size
+    - In a stripe, number of blocks a disk can have
+    - large chunk
+        - less parallelism
+        - better positioning time, especially when the file fits in a single block
+    - smaller chunk
+        - more parallelism
+        - poor positioning time
+
+steady-state throughput
+- bandwith of concurrent requests
+
+single-request latency
+- latency of single logical IO request
+    - implies degree of parallelism for a logical IO
+
+workload
+- sequential
+    - read continuous blocks
+    - e.g. scan a key work in a large file
+- random
+    - e.g. read in database management system
+- mix
+
+S: bandwidth of sequential workload
+R: bandwidth of random workload
+
+To calculate bandwidth of a disk under sequential/random workload
+$$
+band\ width = {
+    {amount\ of\ data\ transfer}
+        \over {T_{rotation} + T_{seeking} + T_{transfer}
+    }
+}
+$$
+
+to calculate bandwidth of RAID 0
+$$
+    {band\ width} = SN or RN
+$$
+
 ## File and directory
 
 file
