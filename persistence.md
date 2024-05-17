@@ -280,6 +280,43 @@ To reconstruct faulty block, calculate XOR(parity, healthy blocks)
         - if faulty bit is 1 bit, the parity - XOR(healthy blocks) = 1
         - if faulty bit is 0 bit, then parity - XOR(healthy blocks) = 0
 
+capacity
+- size = (N-1)*B
+    - A disk is reserved for paraity bits
+
+reliability
+- can tolerate failure of one disk at most
+
+steady state throughput
+- sequential write
+    - bandwidth = S(N-1)
+    - bandwith of one disk is reserved for parity
+- sequential write
+    - bandwidth = S(N-1)
+    - e.g. full stripe write;
+- random read
+    - bandwidth = R(N-1)
+
+additive parity
+- when update a block on a disk, read data block from other disk in a stripe, and compute new parity
+    - con
+        - physical IO cost is high since extra reads are required
+
+subtractive parity
+- intuition
+    - If a bit in data block are flipped, parity is flipped, too
+    - hence equation:
+    ```
+    P_{new} = C_{old} XOR C_{new} XOR P_{old}
+    ```
+- write is amplified
+    - each write needs two physical reads and two physical write
+- parity disk is the bottleneck for random small write scenario
+    - when write to two blocks on two different stripes, second write has to wait for the first write to update data & parity block before second write continue
+    - thus we can't achieve parallelism in small writes
+    - bandwidth = R/2
+        - one read and one write IO to parity disk for each write request
+
 ## File and directory
 
 file
