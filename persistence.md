@@ -146,6 +146,14 @@ IO merging
 - Non work conserve
     - Or anticipatory disk schedule
     - Group disk requests that read nearby block
+
+## Redundant Array of Inexpensive Disks(RAIDs)
+
+In RAIDs, multiple disks are connected in parallel to increase capacity, redundancy, and speed up IO time
+
+RAIDs offers transparency
+- RAIDs interface is like a single disk; it has excellent software compatibility and deployability.
+
 ## File and directory
 
 file
