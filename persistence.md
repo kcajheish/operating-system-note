@@ -163,6 +163,11 @@ structure
 - micro-controller
     - firmware: write data to buffer block or read data from DRAM
 
+fault model
+- fail stop
+    - disk has two states: working or fail
+- a controller hardware or software detects disk fault immediately
+
 ## File and directory
 
 file
