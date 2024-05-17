@@ -317,6 +317,45 @@ subtractive parity
     - bandwidth = R/2
         - one read and one write IO to parity disk for each write request
 
+RAID level 5
+- rotate parity blocks among disks
+- analysis
+    - capacity, reliability, sequential read/write throughput, latency are similar to RAID level 4
+    - random read
+        - bandwidth = RB
+        - read IO can be distributed evenly
+    - random write
+        - bandwidth = RB/4
+        - each write requires 2 read IO and 2 write IO
+- example of RAID5
+
+| disk 0 | disk 1 | disk 2 | disk 3 | disk 4 |
+|--------|--------|--------|--------|--------|
+| 0      | 1      | 2      | 3      | p1     |
+| 7      | 6      | 5      | p1     | 4      |
+| 11     | 10     | p2     | 9      | 8      |
+- given a block number, find offset on the disk for data block and parity
+```
+i = block number
+n = size of data blocks in a stripe
+start_of_parity_disk = 4
+LEFT = 0
+RIGHT = 1
+
+row = i // n # it the same as offset
+direction = row % 2 # left to right if zero
+modulo = i % n
+if direction == LEFT:
+    data_block_disk = modulo
+else:
+    data_block_disk = n - (modulo+1)
+parity_disk = start_of_parity_disk - row % n
+```
+
+When to use level 4 or level 5?
+- Use RAID 4 if only large write happens.
+- Use RAID 5 if write pattern is random.
+
 ## File and directory
 
 file
