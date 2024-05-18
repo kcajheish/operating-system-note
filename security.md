@@ -289,3 +289,77 @@ Cryptographic capability
     - expiration time
     - particular ip
 
+## Distributed System Security
+
+Two challenges to make system secure
+- Hosts on the public network can't be trusted.
+- Host may not implement security policy.
+    - e.g. Credential and capability are obtained in the way we expected
+
+Two ways to authenticate
+- A website publishes a public key to the users to authenticate itself.
+- User authenticate to the website with password
+    - To keep password confidential over the network, use symmetric key to encrypt the password
+
+Check signature which tell us whether public key indeed comes from our partners
+
+Certificates are bits including:
+1. partner info
+2. public key
+3. expiration
+4. digital sign
+    - encrypted hash value
+        - hash value = cryptograph_hash(item 1,2,3..)
+        - encrypted with private key from trusted authority
+
+Security Authority(CA)
+- Trusted entity that issues certificates.
+- Public key for CA is saved in the browser
+
+To verify public key comes from CA:
+1. Websites or other entities send certificate to the user.
+2. Browser has default public key for trusted authority.
+3. User decrypts digital sign to retrieve hash value
+4. User compute hash value from other information
+5. If computed and stored hash are the same, then we know public key comes from the partner we know
+
+To create certificate, follow X.509 standard.
+
+replay attack
+- resend the message made by the website previously
+- sol
+    - encrypted message includes a unique value; this allow cryptography protocol to spot the messages were sent before
+
+User id and password are encrypted and sent to the site so user authenticate himself.
+
+
+TLS(transport layer security) is safer than SSL(Security Socket layer). Both security protocols are implemented in socket.
+
+When building socket connection, user and the site has to negotiate. For example:
+1. Asymmetric cryptography, RSA with 2048 bits key for authentication
+2. Diffie-Hellman key exchange
+$$
+    \begin{align}
+        X = g^x\ mod\ n \\
+        Y = g^y\ mod\ n \\
+        K = Y^x mod\ n \\
+        = X^y mod\ n \\
+        = g^{xy} mod\ n
+    \end{align}
+$$
+3. hash function SHA-3
+4. Symmetric cryptography, AES 256 bit key for data encryption
+
+Note:
+- When you design your system, the point is not to have the correct answer. Rather, think through all the possible cases.
+
+Web cookies
+1. Created by the site after user is authenticated with password.
+2. User's browswer will store this information.
+3. When user tries to establish next session, the web cookie is included in the request rather than being authenticated with password.
+
+challenge response protocol
+- sever sends different challenges periodically; user appies secret to the challenge and get the response
+- server receives response and authenticate the user.
+- since challenges changes a lot, adversary has no advantages to copy the response
+
