@@ -262,6 +262,12 @@ Every allocation policy has it strength and weakness. There is no best approach.
     - pro: avoid splinter at the head
     - con: have to track two pointers
 
+Segregated list is dedicated for popular size request. When free space in segregated list is running low, slab allocator ask for a slab of memory from general memory allocator.
+- how much should you ask for slab depend on page size and number of objects allocated
+- pro
+    - can serve fix size request quickly
+    - less fragmentation
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
