@@ -268,6 +268,10 @@ Segregated list is dedicated for popular size request. When free space in segreg
     - can serve fix size request quickly
     - less fragmentation
 
+Buddy allocation treats free space having size of $2^N$. Recursively split the space into half. When a buddy in one half is free and has enough space for the request, return pointer.
+- pro: easy to coalesce since next buddy and current buddy differ only by one bit
+![alt text](image-15.png)
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
