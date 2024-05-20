@@ -154,6 +154,15 @@ To save more memory, share code segment between processes.
 - By specifying protection bit, os determine whether a process can read/write/execute data in physical memory.
 - The same physical memory can be mapped to many address space from different processes.
 
+Coarse grain segment
+- address space is chopped into large segments like stack, heap, code
+
+Find grain segment
+- more and smaller segments
+- require segment table
+- why?
+    - to improve memory efficiency, we have to know break down of the memory segment.
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
