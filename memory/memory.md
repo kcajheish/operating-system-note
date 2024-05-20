@@ -141,6 +141,15 @@ issue with top two bits approach
 1. 3 out of 4 segments are used. Space is wasted
 2. Each segment can't grow over a max size
 
+Note that stack grows backward in physical memory. Thus, the offset is calculated differntly.
+- e.g. hex 0x3C00
+    - binary: 11 1100 0000 0000
+        - 11: stack segment
+        - 1100 0000 0000 -> 3072 byte = 3KB
+        - b/c stack grows backword, we have to calculate negative offset
+            - 4 KB(size of a segment) - 3KB = -1 KB
+        - physical address = base + negative offset
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
