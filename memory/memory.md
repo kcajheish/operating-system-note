@@ -89,6 +89,58 @@ When context is switched, base and bound registers are stored in PCB(process con
 
 When process is descheduled by cpu, its base and bound registers can be moved.
 
+## Segmentation
+
+To virtualize memory with base and bound register is wasteful. There are empty space between stack and heap.
+
+Instead, we create logical segments for code, stack and heap. By specifying start and length of the segment, allocated space is not wasted
+
+Segment is allocated when memory is used. Thus you see sparse **address space**
+![alt text](image.png)
+
+Segment consists of base and size which show physical memory that is allocated.
+![alt text](image-1.png)
+
+To access virtual address, 100, in code segment, add off set to the base and check it isn't out of bound
+- e.g. 100 + 32K(base) = 32768(byte), assumes the start of virtual address of code is 0.
+
+Segment violation/fault
+- User process tries to access memory that is out of bound.
+
+How to tell which segment we refer to?
+- use top 2 bits of 14-bit virtual address
+- e.g. 00 code, 01, heap, 10 stack
+
+virtual address 4200
+- Top two bits are 01. thus we use heap base and bound
+- the next 12 bits are 104 and are offset.
+
+![alt text](image-2.png)
+
+code
+- SEG_MASK = 0x3000
+- 0x: hexadecimal format
+- 3000: digits
+    - convert to decimal
+        - $3*16^3= 12288$
+
+- SEG_SHIFT = 12
+```
+1 // get top 2 bits of 14-bit VA
+2 Segment = (VirtualAddress & SEG_MASK) >> SEG_SHIFT
+3 // now get offset
+4 Offset = VirtualAddress & OFFSET_MASK
+5 if (Offset >= Bounds[Segment])
+6   RaiseException(PROTECTION_FAULT)
+7 else
+8   PhysAddr = Base[Segment] + Offset
+9   Register = AccessMemory(PhysAddr)
+```
+
+issue with top two bits approach
+1. 3 out of 4 segments are used. Space is wasted
+2. Each segment can't grow over a max size
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
