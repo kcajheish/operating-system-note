@@ -177,6 +177,41 @@ Thus, **compaction** can copy data of process to continuous memory block.
 Alternatively, use free-list management to track free space. Process can allocate memory from free list that fits their need
 - e.g. best-fit, first-fit, buddy algorithm
 
+## Free Space Management
+
+malloc: given size, return pointer to the memory in heap with that size
+- Note that once memory is allocated you can't relocate it. Thus compaction doesn't work.
+
+free: given pointer, free memory in heap for that pointer.
+- note that os has to keep track of size of the pointer somehow
+
+Internal fragmentation: empty space in heap when allocated memory in heap is larger than usage.
+
+Scenario
+1. allocate memory larger than 10 bytes
+2. allocate memory equal to 10 bytes
+    - ![alt text](image-4.png)
+    - ![alt text](image-5.png)
+3. allocate memory smaller than 10 bytes, **split**
+    - ![alt text](image-6.png)
+4. (continue from 2)free 10 bytes and **coalesce** current and nearby free space into continuous free space
+- ![alt text](image-7.png)
+- ![alt text](image-8.png)
+
+Each allocated memory has **header** along with it. It stores size of allocation which is used in free call.
+```
+typedef struct {
+    int size;
+    int magic;
+} header_t;
+```
+![alt text](image-9.png)
+
+given a pointer to the free space, calculate pointer to the header with pointer arithmetic
+```
+header_t *hptr = (header_t *) ptr - 1;
+```
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
