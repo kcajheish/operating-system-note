@@ -147,7 +147,7 @@ Note that stack grows backward in physical memory. Thus, the offset is calculate
         - 11: stack segment
         - 1100 0000 0000 -> 3072 byte = 3KB
         - b/c stack grows backword, we have to calculate negative offset
-            - 4 KB(size of a segment) - 3KB = -1 KB
+            - 3KB - 4 KB(size of a segment) = -1 KB
         - physical address = base + negative offset
 
 To save more memory, share code segment between processes.
