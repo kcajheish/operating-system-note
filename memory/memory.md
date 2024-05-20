@@ -212,6 +212,42 @@ given a pointer to the free space, calculate pointer to the header with pointer 
 header_t *hptr = (header_t *) ptr - 1;
 ```
 
+Use node as header to track list of free space
+```
+typedef struct __node_t {
+    int size;
+    struct __node_t *next;
+} node_t;
+```
+
+call mmap to allocate free space in heap
+- a single node for free space, $4096 - 8 = 4088 bytes$
+- start at virtual address, 16KB
+- ![alt text](image-10.png)
+
+allocate 100 bytes
+- this node is splitted into 108-byte and 3988-byte node
+- pointer to 100-byte free space is returned
+- header is moved to the start of free list
+- ![alt text](image-11.png)
+
+allocate two more 100 bytes space
+- ![alt text](image-12.png)
+
+free the middle allocated space
+- move header to middle allocated node
+- point next to the previous header
+![alt text](image-13.png)
+
+free the rest of allocated space
+- move header around and build next pointer
+- you can see internal fragmentation even though they form a continuous block.
+![alt text](image-14.png)
+
+When allocation library runs out of space in heap
+1. make system call, sbrk, to grow heap size
+2. return null as error
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
