@@ -163,6 +163,20 @@ Find grain segment
 - why?
     - to improve memory efficiency, we have to know break down of the memory segment.
 
+issues with segmentation
+1. In context switch, segment registers need to be saved and restored
+2. When heap doesn't have free space, allocate free space for heap segment and update the segment size
+3. Segment size varies. It's not easy to allocate new space without holes -> **external fragmentation**
+![alt text](image-3.png)
+
+Thus, **compaction** can copy data of process to continuous memory block.
+- con:
+    1. memory and computation extensive
+    2. make segment hard to grow
+
+Alternatively, use free-list management to track free space. Process can allocate memory from free list that fits their need
+- e.g. best-fit, first-fit, buddy algorithm
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
