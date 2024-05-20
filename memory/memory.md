@@ -150,6 +150,10 @@ Note that stack grows backward in physical memory. Thus, the offset is calculate
             - 4 KB(size of a segment) - 3KB = -1 KB
         - physical address = base + negative offset
 
+To save more memory, share code segment between processes.
+- By specifying protection bit, os determine whether a process can read/write/execute data in physical memory.
+- The same physical memory can be mapped to many address space from different processes.
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
