@@ -248,6 +248,20 @@ When allocation library runs out of space in heap
 1. make system call, sbrk, to grow heap size
 2. return null as error
 
+Every allocation policy has it strength and weakness. There is no best approach.
+- best fit
+    - pro: space is not wasted
+    - con: cost of linear scan
+- worst fit
+    - pro: leave more large chunks in free list
+    - con: cost of linear scan
+- first fit
+    - pro: fast scan in best case
+    - con: scan is slow when free list has many small chunk at head
+- next fit
+    - pro: avoid splinter at the head
+    - con: have to track two pointers
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
