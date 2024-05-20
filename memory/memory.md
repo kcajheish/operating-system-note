@@ -272,6 +272,15 @@ Buddy allocation treats free space having size of $2^N$. Recursively split the s
 - pro: easy to coalesce since next buddy and current buddy differ only by one bit
 ![alt text](image-15.png)
 
+other allocation technique that scales:
+1. advance data structure
+    - balanced binary tree
+    - splay tree
+    - partially ordered tree
+2. runs on multiple processor
+
+to see how real world allocator works: [Understanding glibc malloc](https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/)
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
