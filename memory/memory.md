@@ -342,7 +342,7 @@ linear page table
 - reference bit: whether page is accessed
     - useful for page replacement
 
-![alt text](image-22.png)*access memory with paging*
+![alt text](image-20.png)*access memory with paging*
 - memory address of page table is stored in register
 - VPN_MASK: 110000
 - SHIFT: 4
@@ -352,14 +352,20 @@ linear page table
 - offset: number of bytes away from the base of page
 - note that it is computation expensive to fetch PTE from memory
 
-![alt text](image-21.png)*assembly code in x86*
+assembly code in x86
+```
+1024 movl $0x0,(%edi,%eax,4)
+1028 incl %eax
+1032 cmpl $0x03e8,%eax
+1036 jne 1024
+```
 - copy 0 to (array base + 4 * array index)
     - each element in the array is integer with 4 bytes
 - increase index by 1
 - substract 1000 with index and set the process status flag accordingly
 - jump to label(target address) if status is not equal
 
-![alt text](image-22.png)*memory trace*
+![alt text](image-21.png)*memory trace*
 - size of address space = 64KB
 - page size = 1KB
 - code lives in the first page
