@@ -321,6 +321,27 @@ page table
 ![alt text](image-18.png)
 virtual page number is translated to physical address before OS issues load to physical memory.
 
+Page table
+- map virtual address to physical address
+- usually resides in virtual memory and sometimes swapped to disk
+
+linear page table
+- use array to store physical page frame
+    - index is virtual page number
+
+![alt text](image-19.png)*page table entry (PTE)*
+- PTE resides in page table; size ~=4 bytes
+- valid bit: mark unused space in address space as invalid
+    - process traps to os when it tries to read invalid address
+    - os won't allocate physical page frame for invalid address
+        - to save memory
+- protection bitst: whether page can be read/written/executed
+- present bit: whether virtual page is in physical memory or disk
+    - e.g. swap out rarely used page when address space outgrow physical memory
+- dirty bit: whether page is modified since page is brought to memory
+- reference bit: whether page is accessed
+    - useful for page replacement
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
