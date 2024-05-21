@@ -352,6 +352,25 @@ linear page table
 - offset: number of bytes away from the base of page
 - note that it is computation expensive to fetch PTE from memory
 
+![alt text](image-21.png)*assembly code in x86*
+- copy 0 to (array base + 4 * array index)
+    - each element in the array is integer with 4 bytes
+- increase index by 1
+- substract 1000 with index and set the process status flag accordingly
+- jump to label(target address) if status is not equal
+
+![alt text](image-22.png)*memory trace*
+- size of address space = 64KB
+- page size = 1KB
+- code lives in the first page
+- physical address of page table = 1KB
+- array virtual address from 40000 to 44000
+    - 1000 integer with 4-bytes in an array
+    - virtual page from 39 to 42
+- note that for each loop we have two fetches
+    1. fetch PTE
+    2. fetch element of an array
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
