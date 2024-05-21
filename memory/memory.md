@@ -342,6 +342,16 @@ linear page table
 - reference bit: whether page is accessed
     - useful for page replacement
 
+![alt text](image-22.png)*access memory with paging*
+- memory address of page table is stored in register
+- VPN_MASK: 110000
+- SHIFT: 4
+- for virtual address, 21, VPN = 1 and PTEAddr
+- OFFSET_MASK: 1111
+- PFN: physical frame number, which is extracted from PTE
+- offset: number of bytes away from the base of page
+- note that it is computation expensive to fetch PTE from memory
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
