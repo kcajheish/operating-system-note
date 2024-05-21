@@ -281,6 +281,46 @@ other allocation technique that scales:
 
 to see how real world allocator works: [Understanding glibc malloc](https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/)
 
+## Paging
+
+Segmentation divides virtual memory into variable-sized chunk. It tracks memory usage better but introduce fragment.
+
+Paging divides virtual memory into fixed-sized chunk and thus avoids fragment.
+
+Page
+- a fixed-sized unit in address space
+
+Page frame
+- a fixed-sized slot in physical memory that can be assigned a page
+
+![alt text](image-16.png)*64 bytes address space in 128 bytes physical memory*
+- Physical memory is divided into fixed-sized slots
+- note that a page frame is reserved for OS
+- Few page frames are not used
+- The rest are assigned to pages in address space
+    - Page are not arranged in order.
+
+advantage of paging
+- good abstraction
+    - you don't have to worry about how stack/heap grow to implement your translation
+- simple to grab free page from free list
+
+page table
+- store address translation per process
+    - i.e. map virtual page number to page frame number
+
+![alt text](image-17.png)*virtual address of 21*
+- movl 21, %eax
+    - copy value of address, 21, to general purpose register, %eax
+- virtual address 21 refers to virtual page 1 with 5 bytes offset
+    - binary of 21 = 010101
+- Since each page is 16 byte, we need 4 bits for offset
+- The size of address space is 64 byte. Since there are 4 pages intotal, we need top two bits for virtual page number
+- generally, for address space with size N, we need $\log_2N$ bits for each address
+
+![alt text](image-18.png)
+virtual page number is translated to physical address before OS issues load to physical memory.
+
 ## Translation look aside buffer
 
 Page table is stored in memory. If every instruction fetch and memory access needs to find page table, it’s too slow. To speed things up, we need support from hardware.
