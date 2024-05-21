@@ -470,6 +470,49 @@ Real TLB entry
         - Valid, whether address translation is valid or not
 - Some entries in TLB are reserved for os kernel. A wired register is used to store how many such entries exist
 
+##  Paging: Smaller Table
+
+Page table grows quickly
+- size
+    - page: 4KB
+    - 32-bit address space: $2^{32}$ byte
+    - page table entry: 4 byte
+- each process will have
+    - number of pages: $2^{32} \over {2^{12}}$ = $2^{20}$
+    - page table size: 2^20 * 4 bytes = 4 MB
+
+Big page
+- size of the page increases, number of pages decreases, and thus size of page table decreases.
+- con:
+    - internal fragmentation
+
+hybrid approach: segmentation and paging
+- intuition: we like to see best of both segmentation and paging
+    - only save base and bound register to avoid waste
+    - fix size allocation to avoid fragmentation
+- pro: unused page won't take spaces in page table
+- con:
+    1. waste space when sparsely use in large space
+    2. introduce external fragmentation since we segment page table
+
+![alt text](image-22.png)
+- page table for 16-KB address space
+- Most of the pages are invalid(not used) but still have entries in the page table.
+
+![alt text](image-23.png)
+- Use top two bits(segment bits) to specify types of segment
+    - e.g. 00 unused segment, 01 for code segment, 10 for heap segment, 11 for stack segment
+
+```
+SN = (VirtualAddress & SEG_MASK) >> SN_SHIFT
+VPN = (VirtualAddress & VPN_MASK) >> VPN_SHIFT
+AddressOfPTE = Base[SN] + (VPN * sizeof(PTE))
+```
+- Each process uses segment bits to find base and bound registers for code/heap/stack.
+    - base and bound registers reference to linear page table in memory
+    - process traps to os when process accesses memory out of bound
+    - save and restore registers during context switch
+
 ## Policy
 
 Replacement policy
