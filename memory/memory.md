@@ -625,6 +625,38 @@ swapping page table to disk
 - Swap page table to disk during high memory pressure
     - works for system that place page table in kernel virtual memory
 
+## Swapping
+
+To run multiple processes concurrently, size of address space is larger than memory space. Thus, os stashes away some memory in hard disk drive.
+
+illusion of large address space
+- Program allocates memory as much as it need without worrying that address space is running out.
+
+swap space
+- reserved area in disk where OS read/write pages from/to
+- note that binary code is not in swap space; they can be swapped too.
+
+disk address
+- address of a page in swap space
+
+page fault
+- when looks up a page table index and found that page is not in physical memory
+    - present bit is not set to 1
+
+page fault handler
+- it is executed by os to service page fault
+- steps
+    - find PTE for disk address, issue the request to disk to load page into memory
+    - page table is updated with new PFN for a PTE
+    - OS fetch with given virtual address again
+    - translation of address can't be found in TLB
+    - lookup page table for the translation
+    - update TLB with translation
+    - find translation in TLB and fetch data
+
+overlap of io with execution of another process
+- IO is in flight during swapping, process is blocked, another process is run.
+
 ## Policy
 
 Replacement policy
