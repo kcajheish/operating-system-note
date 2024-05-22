@@ -661,6 +661,45 @@ page replacement policy
 - when memory is full and you like to page in, you page out few pages to make rooms in memory
 - Speed of memory access is like disk if you kick the wrong pages
 
+hardware control flow
+- note that when page fault is raised, hardware traps invalid access, and os run trap handler to load page from swap space into physical page frame.
+```
+1 VPN = (VirtualAddress & VPN_MASK) >> SHIFT
+2 (Success, TlbEntry) = TLB_Lookup(VPN)
+3 if (Success == True) // TLB Hit
+4   if (CanAccess(TlbEntry.ProtectBits) == True)
+5       Offset = VirtualAddress & OFFSET_MASK
+6       PhysAddr = (TlbEntry.PFN << SHIFT) | Offset
+7       Register = AccessMemory(PhysAddr)
+8   else
+9       RaiseException(PROTECTION_FAULT)
+10 else // TLB Miss
+11  PTEAddr = PTBR + (VPN * sizeof(PTE))
+12  PTE = AccessMemory(PTEAddr)
+13  if (PTE.Valid == False)
+14      RaiseException(SEGMENTATION_FAULT)
+15  else
+16      if (CanAccess(PTE.ProtectBits) == False)
+17          RaiseException(PROTECTION_FAULT)
+18      else if (PTE.Present == True)
+19          // assuming hardware-managed TLB
+20          TLB_Insert(VPN, PTE.PFN, PTE.ProtectBits)
+21          RetryInstruction()
+22      else if (PTE.Present == False)
+23          RaiseException(PAGE_FAULT)
+```
+
+os control flow
+```
+1 PFN = FindFreePhysicalPage()
+2 if (PFN == -1) // no free page found
+3   PFN = EvictPage() // replacement algorithm
+4 DiskRead(PTE.DiskAddr, PFN) // sleep (wait for I/O)
+5 PTE.present = True // update page table:
+6 PTE.PFN = PFN // (present/translation)
+7 RetryInstruction() // retry instruction
+```
+
 ## Policy
 
 Replacement policy
