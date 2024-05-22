@@ -513,6 +513,118 @@ AddressOfPTE = Base[SN] + (VPN * sizeof(PTE))
     - process traps to os when process accesses memory out of bound
     - save and restore registers during context switch
 
+![alt text](image-24.png)
+
+Multi-level page
+- Only save translation in page table when process access memory. This can save space for page table.
+- structure
+    - page directory
+        - page directory entry(PDE): pointer to page of page table
+            - valid bit: page of page table is allocated or not
+            - PFN: location of physical memory
+    - page table
+        - page table entry(PTE): pointer to page of data you like to access
+- pro
+    - compact
+        - it supports sparse address space
+    - easy to manage memory
+        - each page table fits within a page
+- con
+    - computation costs
+        - issue two loads when address is not saved in TLB
+    - complexity
+        - traverse multiple levels to find the page table you need
+
+
+![alt text](image-25.png)
+page table index and page directory index
+- assume
+    - size of address space = 16 KB
+    - page size = 64 bytes
+    - PTE size = 4 bytes
+- number of page entry = $size\ of\ address\ space\ \over page\ size$ = 256
+- thus address is represented by 14 bits
+    - 6 bit offset
+    - 8 bit VPN
+- page table size = PTE size * number of page entry = 1 KB
+- number of pages for page table =  page table size/page size =  16 pages
+    - each page holds 16 PTE
+- we needs 16 page directory index
+    - thus, 4 bits of VPN
+- we need 16 page table index
+    - thus 4 bits of VPN
+
+to find address of page directory index
+- PDEAddr = PageDirBase + (PDIndex * sizeof(PDE))
+
+to find address of page table index
+- (PDE.PFN << SHIFT) + (PTIndex * sizeof(PTE))
+- assumes page size = 64 bytes, shift = $\log_2 64$ = 6
+
+finally, to find physical address for the request
+- PhysAddr = (PTE.PFN << SHIFT) + offset
+
+
+Next we consider more than two levels
+![alt text](image-26.png)
+- assume
+    - 4 byte PTE
+    - 512 byte page
+        - holds $2^7$ = 128 entries
+    - 30 bit address space
+- offset bit = $\log_2 512$ = 9
+- VPN bit = 30 - 9 = 21
+    - bit of page table index = 7
+        - number of page table index for a page
+            - = page size / PTE size
+            - = $2^7$
+            - = 128
+    - page directory index(14 bit)
+        - we can't fit $2^{14}$ PDE in a single page
+        - thus split it into
+            - 7 bit page directory index 0
+            - 7 bit page directory index 1
+
+code
+```
+1 VPN = (VirtualAddress & VPN_MASK) >> SHIFT
+2 (Success, TlbEntry) = TLB_Lookup(VPN)
+3 if (Success == True) // TLB Hit
+4   if (CanAccess(TlbEntry.ProtectBits) == True)
+5       Offset = VirtualAddress & OFFSET_MASK
+6       PhysAddr = (TlbEntry.PFN << SHIFT) | Offset
+7       Register = AccessMemory(PhysAddr)
+8   else
+9       RaiseException(PROTECTION_FAULT)
+10 else // TLB Miss
+11  // first, get page directory entry
+12  PDIndex = (VPN & PD_MASK) >> PD_SHIFT
+13  PDEAddr = PDBR + (PDIndex * sizeof(PDE))
+14  PDE = AccessMemory(PDEAddr)
+15  if (PDE.Valid == False)
+16      RaiseException(SEGMENTATION_FAULT)
+17  else
+18      // PDE is valid: now fetch PTE from page table
+19      PTIndex = (VPN & PT_MASK) >> PT_SHIFT
+20      PTEAddr = (PDE.PFN<<SHIFT) + (PTIndex*sizeof(PTE))
+21      PTE = AccessMemory(PTEAddr)
+22      if (PTE.Valid == False)
+23          RaiseException(SEGMENTATION_FAULT)
+24      else if (CanAccess(PTE.ProtectBits) == False)
+25          RaiseException(PROTECTION_FAULT)
+26      else
+27          TLB_Insert(VPN, PTE.PFN, PTE.ProtectBits)
+28      RetryInstruction()
+```
+
+inverted page tables
+- use hash table to store PTE
+    - VPN: (PFN, process id)
+
+swapping page table to disk
+- Swap page table to disk during high memory pressure
+    - works for system that place page table in kernel virtual memory
+
 ## Policy
 
 Replacement policy
