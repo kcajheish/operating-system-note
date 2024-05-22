@@ -699,6 +699,12 @@ os control flow
 6 PTE.PFN = PFN // (present/translation)
 7 RetryInstruction() // retry instruction
 ```
+swap daemon(page daemon)
+- a background thread that pages out pages from memory when num of free pages < low watermark, and until num of free pages = high watermark
+
+cluster pages
+- write a group of pages to disk partition at once; thus increase performance by reducing disk seek and rotation.
+- we need spaces for clustering; thus replacement is necessary to keep some of memory free.
 
 ## Policy
 
