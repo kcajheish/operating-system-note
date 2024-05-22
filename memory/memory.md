@@ -657,6 +657,10 @@ page fault handler
 overlap of io with execution of another process
 - IO is in flight during swapping, process is blocked, another process is run.
 
+page replacement policy
+- when memory is full and you like to page in, you page out few pages to make rooms in memory
+- Speed of memory access is like disk if you kick the wrong pages
+
 ## Policy
 
 Replacement policy
