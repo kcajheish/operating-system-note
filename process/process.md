@@ -1,3 +1,111 @@
+## Process
+
+process
+- a running program
+- It has instructions stored as bytes on disk
+
+virtualizing
+- CPUs are limited resource, but we like to provide an illusion where they are endless so that user can run many programs
+
+time sharing
+- os stop current process from running and run another process
+- a technique to achieve virtualizing
+
+mechanism
+- low level methods and protocol
+- e.g. context switch, a mechanism for time sharing
+
+policy
+- high level algorithm that makes decision
+- e.g. scheduling policy
+
+machine state that process can access to
+- memory
+    - e.g. address space
+- storage device
+    - e.g. IO information
+- register
+    - e.g. program counter, stack pointer and frame pointer
+
+process api
+- create a process
+- delete a process
+- read status of a process
+- suspend and resume a process
+- wait
+
+process creation
+- load executable bytes on disk to address space
+    - load can be done eagerly or lazily
+
+- create run-time stack (or just stack)
+    - resides in address space
+    - local variable, return address, function parameters
+- create heap
+    - dynamic allocated data
+        - data structure like linked list
+    - malloc/free call
+- initialize IO
+    - file descriptor for standard input/output/error
+
+![alt text](image.png)
+process state
+- running
+- ready
+- blocked
+
+transition
+- schedule
+- deschedule
+- issue IO request
+- IO completed
+
+![alt text](image-1.png)
+- $P_0$ issue IO requests and is blocked after running for a while.
+- CPU shedule $P_2$ in ready state.
+- After IO is completed, os decides not to run $P_1$ and put it in ready instead
+
+```
+// the registers xv6 will save and restore
+// to stop and subsequently restart a process
+struct context {
+    int eip;
+    int esp;
+    int ebx;
+    int ecx;
+    int edx;
+    int esi;
+    int edi;
+    int ebp;
+};
+// the different states a process can be in
+enum proc_state { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+
+// the information xv6 tracks about each process
+// including its register context and state
+struct proc {
+    char *mem; // Start of process memory
+    uint sz; // Size of process memory
+    char *kstack; // Bottom of kernel stack
+    // for this process
+    enum proc_state state; // Process state
+    int pid; // Process ID
+    struct proc *parent; // Parent process
+    void *chan; // If !zero, sleeping on chan
+    int killed; // If !zero, has been killed
+    struct file *ofile[NOFILE]; // Open files
+    struct inode *cwd; // Current directory
+    struct context context; // Switch here to run process
+    struct trapframe *tf; // Trap frame for the current interrupt
+}
+```
+- example of process & context struct
+- os uses process list to track process state and information
+- context switch
+    - store registers in context when process tops; load registers from context when proces resumes
+- zombie state = child process exits but hasn't been cleaned up by os
+- parent calls $$wait$$ to wait for child completion, read exit code, and then clean up child process. i.e. clean up zombie process
+
 ## Limited direct execution
 
 Time sharing: cpu executes a task for a while and then the other
